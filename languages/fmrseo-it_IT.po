@@ -1,0 +1,103 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: File Media Renamer for SEO 0.4.3\n"
+"POT-Creation-Date: 2024-04-27 12:00+0000\n"
+"PO-Revision-Date: 2025-01-24 18:35+0000\n"
+"Last-Translator: Mario Rossi <mario.rossi@example.com>\n"
+"Language-Team: Italiano\n"
+"Language: it_IT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Loco https://localise.biz/"
+
+#: frmseo.php:151
+msgid "A file with the new name and the same file extension already exists. Change it or add a number!"
+msgstr "Esiste già un file con il nuovo nome e la stessa estensione del file. Cambialo o aggiungi un numero!"
+
+#. Author of the plugin
+msgid "Alex"
+msgstr ""
+
+#: frmseo.php:93
+msgid "Change image file name and path for better SEO"
+msgstr "Cambia il nome del file immagine e il percorso per una migliore SEO"
+
+#: includes/class-fmr-seo-settings.php:70
+msgid "Configure the settings for File Media Renamer for SEO."
+msgstr "Configura le impostazioni per File Media Renamer per SEO."
+
+#: frmseo.php:159
+msgid "Failed to rename the file."
+msgstr "Impossibile rinominare il file."
+
+#: frmseo.php:202
+msgid "File and thumbnails renamed successfully."
+msgstr "File e miniature rinominati con successo."
+
+#. Name of the plugin
+msgid "File Media Renamer for SEO"
+msgstr ""
+
+#. Parent slug
+#: includes/class-fmr-seo-settings.php:15
+msgid "File Media Renamer Settings"
+msgstr "Impostazioni di File Media Renamer"
+
+#: frmseo.php:133 frmseo.php:142
+msgid "File path not found."
+msgstr "Percorso del file non trovato."
+
+#. Page title
+#: includes/class-fmr-seo-settings.php:16
+msgid "FMR Settings"
+msgstr "Impostazioni FMR"
+
+#: includes/class-fmr-seo-settings.php:58
+msgid "If enabled, the media alt text will also be renamed."
+msgstr "Se abilitato, il testo alternativo del media sarà anche rinominato."
+
+#: includes/class-fmr-seo-settings.php:45
+msgid "If enabled, the media title will also be renamed."
+msgstr "Se abilitato, il titolo del media sarà anche rinominato."
+
+#: frmseo.php:125
+msgid "Nonce verification failed."
+msgstr "Verifica del nonce fallita."
+
+#: frmseo.php:151
+msgid "Original file does not exist."
+msgstr "Il file originale non esiste."
+
+#. ID
+#: includes/class-fmr-seo-settings.php:52
+msgid "Rename Alt Text"
+msgstr "Rinomina Alt Text"
+
+#. ID
+#: includes/class-fmr-seo-settings.php:39
+msgid "Rename Title"
+msgstr "Rinomina Titolo"
+
+#: includes/class-fmr-seo-settings.php:114
+msgid "Save"
+msgstr "Salva"
+
+#: frmseo.php:98
+msgid "Save SEO Name"
+msgstr "Salva Nome SEO"
+
+#: frmseo.php:90
+msgid "SEO Name"
+msgstr "Nome SEO"
+
+#: includes/class-fmr-seo-settings.php:103
+msgid "Settings Saved"
+msgstr "Impostazioni Salvate"
+
+#. Description of the plugin
+msgid "Simple and speedy plug-in for help your SEO"
+msgstr ""
+"\n"
+"Plug-in semplice e veloce per aiutare il tuo SEO"
