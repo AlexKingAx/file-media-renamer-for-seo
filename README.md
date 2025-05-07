@@ -1,7 +1,7 @@
 # File Media Renamer for SEO
 
 **Plugin Name:** File Media Renamer for SEO  
-**Version:** 0.5.2  
+**Version:** 0.5.3  
 **Author:** Alex  
 **License:** GPL-2.0+  
 **License URI:** https://www.gnu.org/licenses/old-licenses/gpl-2.0.html  
@@ -52,14 +52,7 @@ See the full license: [https://www.gnu.org/licenses/old-licenses/gpl-2.0.html](h
 
 ## Changelog
 
-### 0.5.2
-- Performance improvements.  
-- Minor bug fixes.
-
-### 0.5.1
-- Added option to rename alt text.
-
-### 0.5.0
+### 0.5.3
 - First stable release.
 
 ---
