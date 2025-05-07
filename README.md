@@ -1,67 +1,77 @@
-# File Media Renamer for SEO
+=== File Media Renamer for SEO ===
+Contributors: alex  
+Plugin URI: https://filemediarenamerwp.com/  
+Tags: media file renamer, rename media files, image SEO, media SEO, alt text, rename images, SEO optimization, media library, media management, SEO plugin, image optimization, WordPress SEO
+Requires at least: 5.0  
+Tested up to: 6.5  
+Stable tag: 0.5.2  
+License: GPLv2 or later  
+License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html  
 
-**Plugin Name:** File Media Renamer for SEO
-**Version:** 0.5.2
-**Author:** Alex
-**License:** GPL-2.0+
+File Media Renamer for SEO is a simple and fast plugin to improve your WordPress site's SEO by renaming media files directly from the media library.
 
-## Description
+== Description ==
 
-File Media Renamer for SEO è un plugin semplice e veloce per migliorare la SEO del tuo sito WordPress rinominando i file multimediali. Questo plugin ti permette di rinominare i file multimediali direttamente dalla libreria di WordPress, aggiornando automaticamente tutti i riferimenti nei contenuti e nei metadati.
+File Media Renamer for SEO is a lightweight plugin that helps boost your WordPress SEO by allowing you to rename media files directly within the WordPress Media Library. It automatically updates all references to the file across your posts, pages, and metadata.
 
-## Features
+== Features ==
 
-- Rinomina facilmente i file multimediali per migliorare la SEO.
-- Aggiorna automaticamente i riferimenti nei contenuti e nei metadati.
-- Opzioni per rinominare anche il titolo e il testo alternativo delle immagini.
-- Interfaccia utente intuitiva e facile da usare.
+* Easily rename media files to improve SEO.
+* Automatically updates all references in content and metadata.
+* Optionally rename the image title and alt text.
+* Simple and intuitive user interface.
 
-## Installation
+== Installation ==
 
-1. Scarica il plugin come file ZIP.
-2. Vai su "Plugin > Aggiungi nuovo" nella tua dashboard di WordPress.
-3. Clicca su "Carica plugin" e seleziona il file ZIP scaricato.
-4. Clicca su "Installa ora" e poi su "Attiva plugin".
+1. Download the plugin as a ZIP file.
+2. Go to "Plugins > Add New" in your WordPress dashboard.
+3. Click on "Upload Plugin" and select the downloaded ZIP file.
+4. Click "Install Now" and then "Activate Plugin."
 
-## Usage
+== Usage ==
 
-1. Dopo aver attivato il plugin, vai su "Media > Libreria".
-2. Seleziona un file multimediale per modificarlo.
-3. Troverai un nuovo campo "SEO Name" dove potrai inserire il nuovo nome del file.
-4. Clicca su "Salva SEO Name" per rinominare il file e aggiornare tutti i riferimenti.
+1. After activating the plugin, go to "Media > Library."
+2. Select a media file to edit.
+3. You'll find a new "SEO Name" field to enter a new file name.
+4. Click "Save SEO Name" to rename the file and update all references.
 
-## Settings
+== Settings ==
 
-Il plugin aggiunge una pagina delle impostazioni sotto "Media > FMR Settings", dove puoi configurare opzioni aggiuntive come:
+A settings page is available under "Media > FMR Settings," where you can:
 
-- Rinominare automaticamente il titolo del file multimediale.
-- Rinominare automaticamente il testo alternativo del file multimediale.
+* Automatically rename the media title.
+* Automatically rename the media alt text.
 
-## Support
+== Frequently Asked Questions ==
 
-Per qualsiasi domanda o supporto, contattami tramite [il mio sito web](#) o apri un'issue su GitHub.
+= Will this plugin break existing media links? =  
+No, the plugin automatically updates all references when a file is renamed.
 
-## Contributing
+= Is it compatible with the block editor? =  
+Yes, it works with both the Classic and Block Editors.
 
-Le pull request sono benvenute. Per modifiche importanti, apri prima un'issue per discutere dei cambiamenti proposti.
+== Screenshots ==
 
-## License
+1. Edit media screen with SEO Name field.
+2. FMR Settings panel.
 
-Questo plugin è rilasciato sotto la licenza GPL-2.0. Vedi il file [LICENSE](LICENSE) per maggiori dettagli.
+== Changelog ==
 
+= 0.5.2 =
+* Performance improvements.
+* Minor bug fixes.
 
-## Changelog
+= 0.5.1 =
+* Added option to rename alt text.
 
-### 0.5.2
-- Miglioramenti delle performance.
-- Correzione di bug minori.
+= 0.5.0 =
+* First stable release.
 
-### 0.5.1
-- Aggiunta opzione per rinominare il testo alternativo.
+== License ==
 
-### 0.5.0
-- Prima versione stabile del plugin.
+This plugin is licensed under the GPLv2 or later.  
+See the license: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
----
+== Support ==
 
-Grazie per aver utilizzato File Media Renamer for SEO! Spero che ti aiuti a migliorare la SEO del tuo sito WordPress.
+For help or questions, please visit: [https://filemediarenamerwp.com/](https://filemediarenamerwp.com/)
