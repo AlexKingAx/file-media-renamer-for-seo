@@ -24,7 +24,7 @@ add_action('plugins_loaded', 'fmrseo_load_textdomain');
 
 // Include the settings file
 require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-settings.php';
-require_once plugin_dir_path(__FILE__) . 'includes/fmrseo-redirects.php';
+require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-redirects.php';
 
 // Initialize the settings
 function fmrseo_init_settings()
