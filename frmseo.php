@@ -3,7 +3,7 @@
 /**
  * Plugin Name: File Media Renamer for SEO
  * Description: Simple and speedy plug-in for help your SEO
- * Version: 0.5.3
+ * Version: 0.6
  * Author: Alex 
  * Text Domain: fmrseo
  * Domain Path: /languages
@@ -24,6 +24,7 @@ add_action('plugins_loaded', 'fmrseo_load_textdomain');
 
 // Include the settings file
 require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/fmrseo-redirects.php';
 
 // Initialize the settings
 function fmrseo_init_settings()
@@ -163,6 +164,9 @@ function save_seo_name_ajax()
 
         update_attached_file($post_id, $new_file_path);
 
+        // redirect full size image
+        fmrseo_add_redirect($old_file_url, $new_file_url);
+
         // Rename thumbnails
         $metadata = wp_get_attachment_metadata($post_id);
 
@@ -176,6 +180,17 @@ function save_seo_name_ajax()
 
                 if (file_exists($old_thumbnail_path)) {
                     rename($old_thumbnail_path, $new_thumbnail_path);
+
+                    // variable for redirect
+                    $old_thumbnail_url = str_replace($wp_upload_dir['basedir'], $wp_upload_dir['baseurl'], $old_thumbnail_path);
+                    $new_thumbnail_url = str_replace($wp_upload_dir['basedir'], $wp_upload_dir['baseurl'], $new_thumbnail_path);
+
+                    // 🐞 Debug log
+                    error_log("Redirect thumbnail: $old_thumbnail_url → $new_thumbnail_url");
+
+                    // redirect thumbnail image
+                    fmrseo_add_redirect($old_thumbnail_url, $new_thumbnail_url);
+
 
                     // Update the file name in the metadata
                     $metadata['sizes'][$size]['file'] = $thumbnail_name;
@@ -263,13 +278,6 @@ function update_content_image_references_background($old_url, $new_url, $seo_nam
 
         clean_post_cache($post_data->ID);
         wp_cache_delete($post_data->post_name, 'posts');
-
-        // // Salva il redirect
-        // if (!isset($options['redirects'])) {
-        //     $options['redirects'] = [];
-        // }
-        // $options['redirects'][$old_url] = $new_url;
-        // update_option('fmrseo_options', $options);
     }
 
     error_log('Test di logging: questa è una prova!');

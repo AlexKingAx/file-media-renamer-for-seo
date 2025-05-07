@@ -1,7 +1,7 @@
 # File Media Renamer for SEO
 
 **Plugin Name:** File Media Renamer for SEO  
-**Version:** 0.5.3  
+**Version:** 0.6  
 **Author:** Alex  
 **License:** GPL-2.0+  
 **License URI:** https://www.gnu.org/licenses/old-licenses/gpl-2.0.html  
@@ -51,6 +51,9 @@ This plugin is released under the GPL-2.0 license.
 See the full license: [https://www.gnu.org/licenses/old-licenses/gpl-2.0.html](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
 ## Changelog
+
+### 0.6
+- Redirect for image renaming added.
 
 ### 0.5.3
 - First stable release.
