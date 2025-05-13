@@ -11,6 +11,9 @@
 function fmrseo_initialize_redirects_option() {
     if (false === get_option('fmrseo_redirects', false)) {
         add_option('fmrseo_redirects', []);
+        error_log('[FMRSEO Init] Redirects option initialized.');
+    } else {
+        error_log('[FMRSEO Init] Redirects option already exists.');
     }
 }
 
@@ -25,11 +28,14 @@ function fmrseo_add_redirect($old_url, $new_url) {
     $redirects = get_option('fmrseo_redirects');
 
     if (!is_array($redirects)) {
+        error_log('[FMRSEO Add Redirect] Invalid redirects option. Resetting.');
         $redirects = [];
     }
 
     $redirects[$old_url] = $new_url;
     update_option('fmrseo_redirects', $redirects);
+
+    error_log('[FMRSEO Add Redirect] Redirect added: ' . $old_url . ' → ' . $new_url);
 }
 
 /**
@@ -44,6 +50,7 @@ function fmrseo_add_redirect($old_url, $new_url) {
 function fmrseo_check_image_redirect() {
     // Avoid running redirects in the admin area.
     if (is_admin()) {
+        error_log('[FMRSEO Redirect] Skipped: Admin area');
         return;
     }
 
@@ -54,15 +61,22 @@ function fmrseo_check_image_redirect() {
     $request_uri = esc_url_raw($_SERVER['REQUEST_URI']);
     $current_url = home_url($request_uri);
 
+    error_log('[FMRSEO Redirect] Current request: ' . $current_url);
+    error_log('[FMRSEO Redirect] Redirect map: ' . print_r($redirects, true));
+
     // Loop through stored old → new URL pairs to find a match.
     foreach ($redirects as $old => $new) {
         // Compare the requested URL with the stored old URL.
         if (urldecode($current_url) === urldecode($old)) {
+            error_log('[FMRSEO Redirect] MATCH FOUND: ' . $old . ' → ' . $new);
+
             // Perform a 301 redirect to the new URL.
             wp_redirect($new, 301);
             exit;
         }
     }
+
+    error_log('[FMRSEO Redirect] No match found for: ' . $current_url);
 }
 
 // Hook into template_redirect to catch frontend requests before template rendering.
