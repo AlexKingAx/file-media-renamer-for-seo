@@ -1,7 +1,7 @@
 # File Media Renamer for SEO
 
 **Plugin Name:** File Media Renamer for SEO  
-**Version:** 0.6  
+**Version:** 0.6.1  
 **Author:** Alex  
 **License:** GPL-2.0+  
 **License URI:** https://www.gnu.org/licenses/old-licenses/gpl-2.0.html  
@@ -52,8 +52,11 @@ See the full license: [https://www.gnu.org/licenses/old-licenses/gpl-2.0.html](h
 
 ## Changelog
 
+### 0.6.1
+- Fixed file URL replace when name was changed. Now, file url in media modal is correct and can be used to copy and past fastly!
+
 ### 0.6
-- Redirect for image renaming added.
+- Redirect for image renaming added with a table in DB.
 
 ### 0.5.3
 - First stable release.

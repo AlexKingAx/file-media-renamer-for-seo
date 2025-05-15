@@ -36,7 +36,6 @@ jQuery(document).ready(function ($) {
 
                   // Update the value of the input field in the modal
                   $("#attachment-details-two-column-copy-link").val(response.data.url);
-                  $("#attachment-details-two-column-copy-link").val(response.data.filename);
 
                   // Update the thumbnail in the Media Library for bypasss cache
                   const thumbnail = $('.attachment[data-id="' + post_id + '"] img');
