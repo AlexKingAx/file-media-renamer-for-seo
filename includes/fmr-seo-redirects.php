@@ -18,32 +18,48 @@ function fmrseo_initialize_redirects_option() {
 }
 
 /**
- * Adds a redirect rule from an old media URL to a new one.
+ * Adds or updates a redirect in the custom database table.
  *
- * @param string $old_url The original media URL before renaming.
- * @param string $new_url The new media URL after renaming.
+ * @param string $old_url The original media URL.
+ * @param string $new_url The new media URL.
  * @return void
  */
 function fmrseo_add_redirect($old_url, $new_url) {
-    $redirects = get_option('fmrseo_redirects');
+    global $wpdb;
 
-    if (!is_array($redirects)) {
-        error_log('[FMRSEO Add Redirect] Invalid redirects option. Resetting.');
-        $redirects = [];
+    $table_name = $wpdb->prefix . 'fmrseo_redirects';
+
+    // Check if the redirect already exists
+    $existing_redirect = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_name WHERE old_url = %s",
+            $old_url
+        )
+    );
+
+    if ($existing_redirect) {
+        // Update the existing redirect
+        $wpdb->update(
+            $table_name,
+            ['new_url' => $new_url],
+            ['old_url' => $old_url],
+            ['%s'],
+            ['%s']
+        );
+        error_log('[FMRSEO Add Redirect] Redirect updated: ' . $old_url . ' → ' . $new_url);
+    } else {
+        // Insert a new redirect
+        $wpdb->insert(
+            $table_name,
+            ['old_url' => $old_url, 'new_url' => $new_url],
+            ['%s', '%s']
+        );
+        error_log('[FMRSEO Add Redirect] New redirect added: ' . $old_url . ' → ' . $new_url);
     }
-
-    $redirects[$old_url] = $new_url;
-    update_option('fmrseo_redirects', $redirects);
-
-    error_log('[FMRSEO Add Redirect] Redirect added: ' . $old_url . ' → ' . $new_url);
 }
 
 /**
- * Redirects old media URLs to their new locations based on stored mappings.
- *
- * This function hooks into the `template_redirect` action and checks if the current
- * request URL matches any previously stored old media URL. If a match is found,
- * it performs a 301 redirect to the new media URL, helping preserve SEO and avoid broken links.
+ * Checks if the requested URL has a redirect and performs it if necessary.
  *
  * @return void
  */
@@ -54,26 +70,26 @@ function fmrseo_check_image_redirect() {
         return;
     }
 
-    // Retrieve the stored redirect mappings from the options table.
-    $redirects = get_option('fmrseo_redirects', []);
+    global $wpdb;
 
     // Build the current full URL being requested.
-    $request_uri = esc_url_raw($_SERVER['REQUEST_URI']);
-    $current_url = home_url($request_uri);
+    $request_uri = ltrim(esc_url_raw($_SERVER['REQUEST_URI']), '/');
+    $current_url = rtrim(home_url(), '/') . '/' . $request_uri;
 
-    error_log('[FMRSEO Redirect] Current request: ' . $current_url);
-    error_log('[FMRSEO Redirect] Redirect map: ' . print_r($redirects, true));
+    // Check if there's a redirect for the requested URL
+    $table_name = $wpdb->prefix . 'fmrseo_redirects';
+    $redirect = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM $table_name WHERE old_url = %s",
+            $current_url
+        )
+    );
 
-    // Loop through stored old → new URL pairs to find a match.
-    foreach ($redirects as $old => $new) {
-        // Compare the requested URL with the stored old URL.
-        if (urldecode($current_url) === urldecode($old)) {
-            error_log('[FMRSEO Redirect] MATCH FOUND: ' . $old . ' → ' . $new);
-
-            // Perform a 301 redirect to the new URL.
-            wp_redirect($new, 301);
-            exit;
-        }
+    // If a redirect is found, perform a 301 redirect
+    if ($redirect) {
+        error_log('[FMRSEO Redirect] Match found: ' . $current_url . ' → ' . $redirect->new_url);
+        wp_redirect($redirect->new_url, 301);
+        exit;
     }
 
     error_log('[FMRSEO Redirect] No match found for: ' . $current_url);

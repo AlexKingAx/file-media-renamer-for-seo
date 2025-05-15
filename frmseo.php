@@ -403,3 +403,36 @@ function update_value_in_array($array, $old_value, $new_value)
     }
     return $array;
 }
+
+/**
+ * Create the custom redirects table on plugin activation.
+ */
+function fmrseo_create_redirects_table() {
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'fmrseo_redirects';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        old_url TEXT NOT NULL,
+        new_url TEXT NOT NULL,
+        PRIMARY KEY (id),
+        UNIQUE KEY old_url (old_url(255))
+    ) $charset_collate;";
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    dbDelta($sql);
+}
+register_activation_hook(__FILE__, 'fmrseo_create_redirects_table');
+
+/**
+ * Drop the custom redirects table on plugin deactivation.
+ */
+function fmrseo_drop_redirects_table() {
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'fmrseo_redirects';
+    $wpdb->query("DROP TABLE IF EXISTS $table_name");
+}
+register_deactivation_hook(__FILE__, 'fmrseo_drop_redirects_table');
