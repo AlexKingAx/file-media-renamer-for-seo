@@ -34,6 +34,21 @@ function fmrseo_init_settings()
 add_action('init', 'fmrseo_init_settings');
 
 /**
+ * Add a settings link to the plugin action links.
+ */
+function frmseo_setting_link($links)
+{
+    // Add a settings link to the plugin action links
+    $settings_link = '<a href="upload.php?page=fmrseo">' . __('Settings', 'fmrseo') . '</a>';
+    // Add the settings link to the beginning of the links array
+    array_unshift($links, $settings_link);
+
+    return $links;
+}
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'frmseo_setting_link');
+
+
+/**
  * Main function to handle plugin hooks and filters.
  */
 function rename_media_seo_activation()
@@ -407,7 +422,8 @@ function update_value_in_array($array, $old_value, $new_value)
 /**
  * Create the custom redirects table on plugin activation.
  */
-function fmrseo_create_redirects_table() {
+function fmrseo_create_redirects_table()
+{
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'fmrseo_redirects';
@@ -429,7 +445,8 @@ register_activation_hook(__FILE__, 'fmrseo_create_redirects_table');
 /**
  * Drop the custom redirects table on plugin deactivation.
  */
-function fmrseo_drop_redirects_table() {
+function fmrseo_drop_redirects_table()
+{
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'fmrseo_redirects';
