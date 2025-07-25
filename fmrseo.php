@@ -25,6 +25,7 @@ add_action('plugins_loaded', 'fmrseo_load_textdomain');
 // Include the settings file
 require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-redirects.php';
+require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-bulk-rename.php';
 
 // Initialize the settings
 function fmrseo_init_settings()
@@ -261,6 +262,55 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
 }
 
 /**
+ * Wrapper function for complete rename process (reusable)
+ */
+function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false) {
+    $history = get_post_meta($post_id, '_fmrseo_rename_history', true);
+    $restore = $is_restore;
+    
+    if (!is_array($history)) $history = [];
+    elseif (count($history) > 0 && !$is_restore) {
+        // Check if the new name is already in history
+        foreach ($history as $version) {
+            if ($version['seo_name'] === $seo_name) {
+                $restore = true;
+                break;
+            }
+        }
+    }
+
+    // If not restoring, sanitize the SEO name
+    if (!$restore) $seo_name = sanitize_title($seo_name);
+
+    // Use the rename function
+    $result = fmrseo_rename_media_file($post_id, $seo_name, $restore);
+
+    // Update the post name to match the new SEO name if unique role is used
+    if(isset($result['seo_name'])) {
+        $seo_name = $result['seo_name'];
+    }
+
+    // save image_seo_name Custom Field of the plugin
+    update_post_meta($post_id, 'image_seo_name', $seo_name);
+
+    // --- Begin: Save rename history ---
+    // Add current file info to history before renaming
+    array_unshift($history, [
+        'file_path' => $result['old_file_path'],
+        'file_url'  => $result['old_file_url'],
+        'seo_name'  => basename($result['old_file_path'], '.' . $result['file_ext']),
+        'timestamp' => time(),
+    ]);
+
+    // Keep only the last 2 versions
+    $history = array_slice($history, 0, 2);
+    update_post_meta($post_id, '_fmrseo_rename_history', $history);
+    // --- End: Save rename history ---
+    
+    return $result;
+}
+
+/**
  * Save the SEO name via AJAX.
  */
 function frmseo_save_seo_name_ajax()
@@ -272,65 +322,22 @@ function frmseo_save_seo_name_ajax()
 
         $post_id = intval($_POST['post_id']);
         $seo_name = sanitize_text_field($_POST['seo_name']);
-        // $seo_name = sanitize_title($seo_name);
         $seo_name = sanitize_file_name($seo_name);
-
-        error_log("seo_name: " . $seo_name);
 
         if (!$post_id || !$seo_name) {
             throw new Exception(__('File path not found.', 'fmrseo'));
         }
 
-
-
-        $history = get_post_meta($post_id, '_fmrseo_rename_history', true);
-        $restore = false; // Flag to indicate if we are restoring a previous version
-        if (!is_array($history)) $history = [];
-        elseif (count($history) > 0) {
-            error_log(json_encode($history));
-            // Check if the new name is already in history
-            foreach ($history as $version) {
-                if ($version['seo_name'] === $seo_name) {
-                    $restore = true; // Set the flag to true if the name already exists in history
-                    break;
-                }
-            }
-        }
-
-        error_log("Restore prima: " . ($restore ? 'true' : 'false'));
-
-        // If not restoring, sanitize the SEO name
-        if (!$restore) $seo_name = sanitize_title($seo_name);
-
-        // Use the new reusable function
-        $result = fmrseo_rename_media_file($post_id, $seo_name, $restore);
-
-        // Update the post name to match the new SEO name if unique role is used
-        if(isset($result['seo_name'])) {
-            $seo_name = $result['seo_name'];
-        }
-
-        // save image_seo_name Custom Field of the plugin
-        update_post_meta($post_id, 'image_seo_name', $seo_name);
-
-        // --- Begin: Save rename history ---
-        // Add current file info to history before renaming
-        array_unshift($history, [
-            'file_path' => $result['old_file_path'],
-            'file_url'  => $result['old_file_url'],
-            'seo_name'  => basename($result['old_file_path'], '.' . $result['file_ext']),
-            'timestamp' => time(),
-        ]);
-
-        // Keep only the last 2 versions
-        $history = array_slice($history, 0, 2);
-        update_post_meta($post_id, '_fmrseo_rename_history', $history);
-        // --- End: Save rename history ---
+        // Use the wrapper function
+        $result = fmrseo_complete_rename_process($post_id, $seo_name);
+        
+        // Get final seo_name in case it was modified
+        $final_seo_name = isset($result['seo_name']) ? $result['seo_name'] : pathinfo($result['new_file_path'], PATHINFO_FILENAME);
 
         wp_send_json_success([
             'message'  => __('File and thumbnails renamed successfully.', 'fmrseo'),
             'url'      => $result['new_file_url'],
-            'filename' => $seo_name . '.' . $result['file_ext']
+            'filename' => $final_seo_name . '.' . $result['file_ext']
         ]);
     } catch (Exception $e) {
         wp_send_json_error(['message' => $e->getMessage()]);

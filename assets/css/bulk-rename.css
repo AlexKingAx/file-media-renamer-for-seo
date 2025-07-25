@@ -1,0 +1,177 @@
+/* Modal styles for bulk rename */
+#fmrseo-bulk-rename-modal {
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.fmrseo-modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fmrseo-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fmrseo-modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.fmrseo-close {
+    color: #666;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.fmrseo-close:hover {
+    color: #000;
+}
+
+.fmrseo-modal-body {
+    padding: 20px;
+}
+
+.fmrseo-form-group {
+    margin-bottom: 20px;
+}
+
+.fmrseo-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.fmrseo-form-group input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.fmrseo-form-group .description {
+    margin-top: 5px;
+    font-style: italic;
+    color: #666;
+    font-size: 13px;
+}
+
+.fmrseo-progress {
+    margin: 20px 0;
+}
+
+.fmrseo-progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.fmrseo-progress-fill {
+    height: 100%;
+    background-color: #0073aa;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.fmrseo-progress-text {
+    text-align: center;
+    font-weight: 600;
+    color: #0073aa;
+}
+
+.fmrseo-results {
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+.fmrseo-results h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.fmrseo-results ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.fmrseo-results li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.fmrseo-results li:last-child {
+    border-bottom: none;
+}
+
+.fmrseo-result-success {
+    color: #46b450;
+}
+
+.fmrseo-result-error {
+    color: #dc3232;
+}
+
+.fmrseo-status-icon {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.fmrseo-error {
+    color: #dc3232;
+    font-weight: 600;
+    padding: 10px;
+    background-color: #ffeaea;
+    border: 1px solid #dc3232;
+    border-radius: 4px;
+}
+
+.fmrseo-modal-footer {
+    padding: 20px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+}
+
+.fmrseo-modal-footer .button {
+    margin-left: 10px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .fmrseo-modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .fmrseo-modal-header,
+    .fmrseo-modal-body,
+    .fmrseo-modal-footer {
+        padding: 15px;
+    }
+}

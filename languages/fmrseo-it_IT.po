@@ -96,6 +96,80 @@ msgstr "Nome SEO"
 msgid "Settings Saved"
 msgstr "Impostazioni Salvate"
 
+#. Bulk rename translations
+msgid "Rename"
+msgstr "Rinomina"
+
+msgid "Rename Selected Media"
+msgstr "Rinomina Media Selezionati"
+
+msgid "You have selected %d files to rename."
+msgstr "Hai selezionato %d file da rinominare."
+
+msgid "Base name:"
+msgstr "Nome base:"
+
+msgid "e.g: new-name"
+msgstr "es: nuovo-nome"
+
+msgid "Files will be renamed as: new-name-1, new-name-2, etc."
+msgstr "I file saranno rinominati come: nuovo-nome-1, nuovo-nome-2, ecc."
+
+msgid "Cancel"
+msgstr "Annulla"
+
+msgid "Start Rename"
+msgstr "Inizia Rinomina"
+
+msgid "Processing..."
+msgstr "Elaborazione in corso..."
+
+msgid "Rename completed!"
+msgstr "Rinomina completata!"
+
+msgid "Error during rename"
+msgstr "Errore durante la rinomina"
+
+msgid "File renamed successfully"
+msgstr "File rinominato con successo"
+
+msgid "Error renaming file"
+msgstr "Errore nella rinomina del file"
+
+msgid "Security verification failed."
+msgstr "Verifica di sicurezza fallita."
+
+msgid "Insufficient permissions."
+msgstr "Permessi insufficienti."
+
+msgid "Missing parameters."
+msgstr "Parametri mancanti."
+
+msgid "Base name can only contain letters, numbers, hyphens and underscores."
+msgstr "Il nome base può contenere solo lettere, numeri, trattini e underscore."
+
+msgid "You can rename maximum 50 files at once."
+msgstr "Puoi rinominare massimo 50 file alla volta."
+
+msgid "One or more IDs are not valid media files."
+msgstr "Uno o più ID non sono file media validi."
+
+#. JavaScript strings
+msgid "Please enter a base name for the files."
+msgstr "Inserisci un nome base per i file."
+
+msgid "Are you sure you want to rename %d files?"
+msgstr "Sei sicuro di voler rinominare %d file?"
+
+msgid "Close and Reload"
+msgstr "Chiudi e Ricarica"
+
+msgid "Results:"
+msgstr "Risultati:"
+
+msgid "Error:"
+msgstr "Errore:"
+
 #. Description of the plugin
 msgid "Simple and speedy plug-in for help your SEO"
 msgstr ""
