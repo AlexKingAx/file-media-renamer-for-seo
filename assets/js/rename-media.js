@@ -46,6 +46,7 @@ jQuery(document).ready(function ($) {
           } else {
             console.warn("Thumbnail not found in the media library!");
           }
+          window.location.reload(true);
         } else if (!response.success) {
           // if success false then show alert with message
           alert(response.data.message);
