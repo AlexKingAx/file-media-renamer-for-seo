@@ -3,7 +3,7 @@
 /**
  * Plugin Name: File Media Renamer for SEO
  * Description: Simple and speedy plug-in for help your SEO
- * Version: 0.6.1
+ * Version: 0.7.0
  * Author: Alex 
  * Text Domain: fmrseo
  * Domain Path: /languages
