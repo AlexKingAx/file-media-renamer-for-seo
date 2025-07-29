@@ -1,177 +1,217 @@
-/* Modal styles for bulk rename */
+/* Modal overlay */
 #fmrseo-bulk-rename-modal {
-    position: fixed;
-    z-index: 100000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 100000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
 }
 
+/* Modal container */
 .fmrseo-modal-content {
-    background-color: #fff;
-    margin: 5% auto;
-    padding: 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: #191816;
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 0;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
 }
 
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Header */
 .fmrseo-modal-header {
-    padding: 20px;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  background-color: #0b0a08;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #2c2b29;
 }
 
 .fmrseo-modal-header h2 {
-    margin: 0;
-    font-size: 18px;
+  font-size: 16px;
+  margin: 0;
+  color: #ffffff;
 }
 
 .fmrseo-close {
-    color: #666;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 1;
+  font-size: 20px;
+  font-weight: bold;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .fmrseo-close:hover {
-    color: #000;
+  color: #ffffff;
 }
 
+/* Body */
 .fmrseo-modal-body {
-    padding: 20px;
+  padding: 20px;
 }
 
 .fmrseo-form-group {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .fmrseo-form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #a1a1aa;
 }
 
-.fmrseo-form-group input[type="text"] {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
+.fmrseo-form-group input[type='text'] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #333;
+  background-color: #0b0a08;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-.fmrseo-form-group .description {
-    margin-top: 5px;
-    font-style: italic;
-    color: #666;
-    font-size: 13px;
+.fmrseo-form-group input[type='text']:focus {
+  outline: none;
+  border-color: #1dbded;
 }
 
-.fmrseo-progress {
-    margin: 20px 0;
-}
-
+/* Progress bar */
 .fmrseo-progress-bar {
-    width: 100%;
-    height: 20px;
-    background-color: #f0f0f0;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 10px;
+  background-color: #2c2b29;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 12px;
 }
 
 .fmrseo-progress-fill {
-    height: 100%;
-    background-color: #0073aa;
-    width: 0%;
-    transition: width 0.3s ease;
+  background: linear-gradient(90deg, #1dbded 0%, #ea8b46 100%);
+  height: 100%;
+  width: 0%;
+  transition: width 0.4s ease;
 }
 
 .fmrseo-progress-text {
-    text-align: center;
-    font-weight: 600;
-    color: #0073aa;
+  text-align: center;
+  color: #1dbded;
+  font-weight: 600;
+  font-size: 12px;
+  margin-top: 6px;
 }
 
+/* Results */
 .fmrseo-results {
-    margin-top: 20px;
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 15px;
-    background-color: #f9f9f9;
-}
-
-.fmrseo-results h4 {
-    margin-top: 0;
-    margin-bottom: 15px;
+  margin-top: 20px;
+  background-color: #0b0a08;
+  border: 1px solid #2c2b29;
+  border-radius: 6px;
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 14px;
 }
 
 .fmrseo-results ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .fmrseo-results li {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
 }
 
 .fmrseo-results li:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .fmrseo-result-success {
-    color: #46b450;
+  color: #1dbded;
 }
 
 .fmrseo-result-error {
-    color: #dc3232;
+  color: #ea8b46;
 }
 
 .fmrseo-status-icon {
-    font-weight: bold;
-    margin-right: 8px;
+  margin-right: 6px;
+  font-weight: bold;
 }
 
+/* Error Box */
 .fmrseo-error {
-    color: #dc3232;
-    font-weight: 600;
-    padding: 10px;
-    background-color: #ffeaea;
-    border: 1px solid #dc3232;
-    border-radius: 4px;
+  background-color: #2c0f0f;
+  color: #ffb3b3;
+  border: 1px solid #ea8b46;
+  border-radius: 4px;
+  padding: 10px;
+  font-weight: 600;
 }
 
+/* Footer */
 .fmrseo-modal-footer {
-    padding: 20px;
-    border-top: 1px solid #ddd;
-    text-align: right;
+  padding: 16px 20px;
+  border-top: 1px solid #2c2b29;
+  background-color: #0b0a08;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
-.fmrseo-modal-footer .button {
-    margin-left: 10px;
+/* PRIMARY BUTTON (Solid Orange) */
+.fmrseo-modal-footer .button-primary {
+  background-color: #ea8b46;
+  color: #0b0a08;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-    .fmrseo-modal-content {
-        width: 95%;
-        margin: 10% auto;
-    }
-    
-    .fmrseo-modal-header,
-    .fmrseo-modal-body,
-    .fmrseo-modal-footer {
-        padding: 15px;
-    }
+.fmrseo-modal-footer .button-primary:hover {
+  background-color: #d1783c;
+}
+
+/* SECONDARY BUTTON (Orange Outline) */
+.fmrseo-modal-footer .button-secondary {
+  background-color: transparent;
+  color: #ea8b46;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  border: 2px solid #ea8b46;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fmrseo-modal-footer .button-secondary:hover {
+  background-color: rgba(234, 139, 70, 0.1);
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .fmrseo-modal-content {
+    width: 95%;
+  }
 }

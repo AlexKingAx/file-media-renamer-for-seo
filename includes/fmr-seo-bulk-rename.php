@@ -60,7 +60,7 @@ function fmrseo_display_bulk_rename_modal()
                 <p><?php printf(__('You have selected %d files to rename.', 'fmrseo'), count($post_ids)); ?></p>
                 <div class="fmrseo-form-group">
                     <label for="fmrseo-bulk-name"><?php _e('Base name:', 'fmrseo'); ?></label>
-                    <input type="text" id="fmrseo-bulk-name" placeholder="<?php _e('e.g: new-name', 'fmrseo'); ?>" />
+                    <input type="text" id="fmrseo-bulk-name" placeholder="<?php _e('e.g: new name', 'fmrseo'); ?>" />
                     <p class="description"><?php _e('Files will be renamed as: new-name-1, new-name-2, etc.', 'fmrseo'); ?></p>
                 </div>
                 <div class="fmrseo-progress" style="display: none;">
@@ -74,6 +74,10 @@ function fmrseo_display_bulk_rename_modal()
             <div class="fmrseo-modal-footer">
                 <button type="button" class="button button-secondary" id="fmrseo-cancel-bulk"><?php _e('Cancel', 'fmrseo'); ?></button>
                 <button type="button" class="button button-primary" id="fmrseo-start-bulk"><?php _e('Start Rename', 'fmrseo'); ?></button>
+                <button type="button" class="button button-primary" id="fmrseo-close-bulk" style="display: none;" disabled="true">
+    <?php _e('Close', 'fmrseo'); ?>
+</button>
+
             </div>
         </div>
     </div>
