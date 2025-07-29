@@ -240,8 +240,8 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
 
     // Schedule background refresh for full-size image
     frmseo_schedule_update_content_image_references($old_file_url, $new_file_url, $seo_name, $post_id);
-    
-    if($unique){
+
+    if ($unique) {
         return [
             'old_file_path' => $file_path,
             'old_file_url'  => $old_file_url,
@@ -257,17 +257,18 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
         'old_file_url'  => $old_file_url,
         'new_file_path' => $new_file_path,
         'new_file_url'  => $new_file_url,
-        'file_ext'      => $file_ext,        
+        'file_ext'      => $file_ext,
     ];
 }
 
 /**
  * Wrapper function for complete rename process (reusable)
  */
-function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false) {
+function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false)
+{
     $history = get_post_meta($post_id, '_fmrseo_rename_history', true);
     $restore = $is_restore;
-    
+
     if (!is_array($history)) $history = [];
     elseif (count($history) > 0 && !$is_restore) {
         // Check if the new name is already in history
@@ -286,7 +287,7 @@ function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false
     $result = fmrseo_rename_media_file($post_id, $seo_name, $restore);
 
     // Update the post name to match the new SEO name if unique role is used
-    if(isset($result['seo_name'])) {
+    if (isset($result['seo_name'])) {
         $seo_name = $result['seo_name'];
     }
 
@@ -306,7 +307,7 @@ function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false
     $history = array_slice($history, 0, 2);
     update_post_meta($post_id, '_fmrseo_rename_history', $history);
     // --- End: Save rename history ---
-    
+
     return $result;
 }
 
@@ -330,7 +331,7 @@ function frmseo_save_seo_name_ajax()
 
         // Use the wrapper function
         $result = fmrseo_complete_rename_process($post_id, $seo_name);
-        
+
         // Get final seo_name in case it was modified
         $final_seo_name = isset($result['seo_name']) ? $result['seo_name'] : pathinfo($result['new_file_path'], PATHINFO_FILENAME);
 
@@ -389,15 +390,26 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
         // Retrieve saved settings
         $options = get_option('fmrseo_options');
 
-        // Update post title if option is set
-        if (isset($options['rename_title']) && $options['rename_title'] == 1) {
-            wp_update_post(['ID' => $post_id, 'post_title' => $seo_name]);
+        // if rename_title or rename_alt_text options are set to true, create a readable SEO name and update the post title and alt text
+        // This is useful for SEO purposes, as it makes the title and alt text more readable for crawlers and users
+        $should_rename_title = !empty($options['rename_title']);
+        $should_rename_alt_text = !empty($options['rename_alt_text']);
+
+        if ($should_rename_title || $should_rename_alt_text) {
+            $readable_seo_name = str_replace(['-', '_'], ' ', $seo_name);
+            $readable_seo_name = ucfirst(trim($readable_seo_name));
+
+            // Update post title if option is set
+            if ($should_rename_title) {
+                wp_update_post(['ID' => $post_id, 'post_title' => $readable_seo_name]);
+            }
+
+            // Update alt text if option is set
+            if ($should_rename_alt_text) {
+                update_post_meta($post_id, '_wp_attachment_image_alt', $readable_seo_name);
+            }
         }
 
-        // Update alt text if option is set
-        if (isset($options['rename_alt_text']) && $options['rename_alt_text'] == 1) {
-            update_post_meta($post_id, '_wp_attachment_image_alt', $seo_name);
-        }
 
         clean_post_cache($post_data->ID);
         wp_cache_delete($post_data->post_name, 'posts');
