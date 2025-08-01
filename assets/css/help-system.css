@@ -1,0 +1,339 @@
+/**
+ * Help System Styles
+ * File Media Renamer for SEO
+ */
+
+/* Help Content Styling */
+.fmrseo-help-content {
+    line-height: 1.6;
+    font-size: 13px;
+}
+
+.fmrseo-help-content h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #23282d;
+    border-bottom: 2px solid #0073aa;
+    padding-bottom: 8px;
+}
+
+.fmrseo-help-content h4 {
+    margin: 20px 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #23282d;
+}
+
+.fmrseo-help-content p {
+    margin: 0 0 15px 0;
+    color: #646970;
+}
+
+.fmrseo-help-content ul,
+.fmrseo-help-content ol {
+    margin: 0 0 15px 20px;
+    color: #646970;
+}
+
+.fmrseo-help-content li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.fmrseo-help-content strong {
+    color: #23282d;
+    font-weight: 600;
+}
+
+/* Help Boxes */
+.fmrseo-help-note {
+    background: #f0f8ff;
+    border: 1px solid #b3d9ff;
+    border-left: 4px solid #0073aa;
+    border-radius: 4px;
+    padding: 12px 15px;
+    margin: 15px 0;
+}
+
+.fmrseo-help-note p {
+    margin: 0;
+    color: #0073aa;
+}
+
+.fmrseo-help-tip {
+    background: #f0fff4;
+    border: 1px solid #b3ffcc;
+    border-left: 4px solid #00a32a;
+    border-radius: 4px;
+    padding: 12px 15px;
+    margin: 15px 0;
+}
+
+.fmrseo-help-tip p {
+    margin: 0;
+    color: #00a32a;
+}
+
+.fmrseo-help-warning {
+    background: #fff8e1;
+    border: 1px solid #ffecb3;
+    border-left: 4px solid #dba617;
+    border-radius: 4px;
+    padding: 12px 15px;
+    margin: 15px 0;
+}
+
+.fmrseo-help-warning p {
+    margin: 0;
+    color: #856404;
+}
+
+.fmrseo-help-support {
+    background: #f9f9f9;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.fmrseo-help-support h4 {
+    margin-top: 0;
+    color: #23282d;
+}
+
+/* Help Sidebar */
+.fmrseo-help-sidebar {
+    font-size: 13px;
+}
+
+.fmrseo-help-sidebar h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #23282d;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 5px;
+}
+
+.fmrseo-help-sidebar ul {
+    margin: 0 0 20px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.fmrseo-help-sidebar li {
+    margin-bottom: 5px;
+}
+
+.fmrseo-help-sidebar a {
+    color: #0073aa;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.fmrseo-help-sidebar a:hover {
+    color: #005177;
+    text-decoration: underline;
+}
+
+.fmrseo-help-sidebar p {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    color: #646970;
+}
+
+/* Code Blocks */
+.fmrseo-help-content code {
+    background: #f1f1f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    color: #d63638;
+}
+
+.fmrseo-help-content pre {
+    background: #f6f7f7;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    padding: 15px;
+    overflow-x: auto;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Tables in Help */
+.fmrseo-help-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 12px;
+}
+
+.fmrseo-help-content th,
+.fmrseo-help-content td {
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid #e1e1e1;
+}
+
+.fmrseo-help-content th {
+    background: #f9f9f9;
+    font-weight: 600;
+    color: #23282d;
+}
+
+.fmrseo-help-content td {
+    color: #646970;
+}
+
+/* Status Indicators */
+.fmrseo-status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.fmrseo-status-good {
+    background: #00a32a;
+}
+
+.fmrseo-status-warning {
+    background: #dba617;
+}
+
+.fmrseo-status-error {
+    background: #d63638;
+}
+
+/* Responsive Design */
+@media (max-width: 782px) {
+    .fmrseo-help-content {
+        font-size: 14px;
+    }
+    
+    .fmrseo-help-content h3 {
+        font-size: 18px;
+    }
+    
+    .fmrseo-help-content h4 {
+        font-size: 16px;
+    }
+    
+    .fmrseo-help-content ul,
+    .fmrseo-help-content ol {
+        margin-left: 15px;
+    }
+    
+    .fmrseo-help-note,
+    .fmrseo-help-tip,
+    .fmrseo-help-warning {
+        padding: 10px 12px;
+    }
+    
+    .fmrseo-help-content table {
+        font-size: 11px;
+    }
+    
+    .fmrseo-help-content th,
+    .fmrseo-help-content td {
+        padding: 6px 8px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .fmrseo-help-content {
+        color: #000;
+        background: #fff;
+    }
+    
+    .fmrseo-help-note,
+    .fmrseo-help-tip,
+    .fmrseo-help-warning {
+        border: 1px solid #ccc;
+        background: #f9f9f9;
+    }
+    
+    .fmrseo-help-sidebar {
+        display: none;
+    }
+}
+
+/* Accessibility Improvements */
+.fmrseo-help-content a:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: 2px;
+}
+
+.fmrseo-help-content button:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .fmrseo-help-content {
+        color: #000;
+    }
+    
+    .fmrseo-help-content h3,
+    .fmrseo-help-content h4,
+    .fmrseo-help-content strong {
+        color: #000;
+    }
+    
+    .fmrseo-help-note {
+        background: #fff;
+        border-color: #000;
+        color: #000;
+    }
+    
+    .fmrseo-help-tip {
+        background: #fff;
+        border-color: #000;
+        color: #000;
+    }
+    
+    .fmrseo-help-warning {
+        background: #fff;
+        border-color: #000;
+        color: #000;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .fmrseo-help-content {
+        color: #e1e1e1;
+    }
+    
+    .fmrseo-help-content h3,
+    .fmrseo-help-content h4,
+    .fmrseo-help-content strong {
+        color: #fff;
+    }
+    
+    .fmrseo-help-note {
+        background: #1a2332;
+        border-color: #3582c4;
+        color: #7cc7f0;
+    }
+    
+    .fmrseo-help-tip {
+        background: #1a2e1a;
+        border-color: #4caf50;
+        color: #81c784;
+    }
+    
+    .fmrseo-help-warning {
+        background: #2e2a1a;
+        border-color: #ff9800;
+        color: #ffb74d;
+    }
+}

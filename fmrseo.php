@@ -27,12 +27,105 @@ require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-redirects.php';
 require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-bulk-rename.php';
 
+// Autoloader for AI classes
+function fmrseo_autoload_ai_classes($class_name)
+{
+    // Only handle FMR AI classes
+    if (strpos($class_name, 'FMR_') !== 0) {
+        return;
+    }
+
+    // Convert class name to file name
+    $file_name = 'class-' . strtolower(str_replace('_', '-', $class_name)) . '.php';
+    $file_path = plugin_dir_path(__FILE__) . 'includes/ai/' . $file_name;
+
+    if (file_exists($file_path)) {
+        require_once $file_path;
+    }
+}
+spl_autoload_register('fmrseo_autoload_ai_classes');
+
 // Initialize the settings
 function fmrseo_init_settings()
 {
     new File_Media_Renamer_SEO_Settings();
+
+    // Initialize AI History Manager if AI functionality is available
+    if (class_exists('FMR_AI_History_Manager')) {
+        new FMR_AI_History_Manager();
+    }
+
+    // Initialize AI Dashboard Widget if AI functionality is available
+    if (class_exists('FMR_AI_Dashboard_Widget')) {
+        new FMR_AI_Dashboard_Widget();
+    }
+
+    // Initialize AI Statistics Page if AI functionality is available
+    if (class_exists('FMR_AI_Statistics_Page')) {
+        new FMR_AI_Statistics_Page();
+    }
+
+    // Initialize AI Help System
+    if (class_exists('FMR_AI_Help_System')) {
+        new FMR_AI_Help_System();
+    }
+
+    // Initialize AI Settings Extension for security and performance
+    if (class_exists('FMR_AI_Settings_Extension')) {
+        new FMR_AI_Settings_Extension();
+    }
+
+    // Initialize Maintenance Scheduler
+    if (class_exists('FMR_Maintenance_Scheduler')) {
+        new FMR_Maintenance_Scheduler();
+    }
 }
 add_action('init', 'fmrseo_init_settings');
+
+// Initialize AI functionality
+function fmrseo_init_ai()
+{
+    // Only initialize AI if classes are available and we're in admin
+    if (is_admin() && class_exists('FMR_AI_Rename_Controller') && class_exists('FMR_Error_Handler')) {
+        try {
+            new FMR_AI_Rename_Controller();
+        } catch (Exception $e) {
+            // Use error handler if available
+            if (class_exists('FMR_Error_Handler')) {
+                $error_handler = new FMR_Error_Handler();
+                $error_handler->handle_error('system_error', $e, array(
+                    'context' => 'ai_initialization',
+                    'user_id' => get_current_user_id()
+                ));
+            } else {
+                // Fallback to basic error logging
+                error_log('FMR SEO AI initialization error: ' . $e->getMessage());
+            }
+        }
+    }
+}
+add_action('init', 'fmrseo_init_ai');
+
+// Add activation hook to initialize AI settings
+function fmrseo_activate_ai()
+{
+    // Initialize default AI settings
+    $options = get_option('fmrseo_options', array());
+
+    // Set default AI options if not already set
+    if (!isset($options['ai_enabled'])) {
+        $options['ai_enabled'] = false; // Disabled by default
+    }
+    if (!isset($options['ai_timeout'])) {
+        $options['ai_timeout'] = 30;
+    }
+    if (!isset($options['ai_max_retries'])) {
+        $options['ai_max_retries'] = 2;
+    }
+
+    update_option('fmrseo_options', $options);
+}
+register_activation_hook(__FILE__, 'fmrseo_activate_ai');
 
 /**
  * Add a settings link to the plugin action links.
@@ -303,10 +396,13 @@ function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false
         'timestamp' => time(),
     ]);
 
-    // Keep only the last 2 versions
+    // Keep only the last 2 versions (will be extended by AI history manager)
     $history = array_slice($history, 0, 2);
     update_post_meta($post_id, '_fmrseo_rename_history', $history);
     // --- End: Save rename history ---
+
+    // Fire action for comprehensive history tracking
+    do_action('fmrseo_after_rename', $post_id, $result, array('method' => 'manual'));
 
     return $result;
 }

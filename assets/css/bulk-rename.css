@@ -209,6 +209,86 @@
   background-color: rgba(234, 139, 70, 0.1);
 }
 
+/* AI-specific styles */
+.fmrseo-rename-method {
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #0b0a08;
+  border: 1px solid #2c2b29;
+  border-radius: 6px;
+}
+
+.fmrseo-rename-method h4 {
+  margin: 0 0 12px 0;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fmrseo-method-option {
+  display: block;
+  margin-bottom: 8px;
+  cursor: pointer;
+  color: #a1a1aa;
+  font-size: 14px;
+}
+
+.fmrseo-method-option:last-child {
+  margin-bottom: 0;
+}
+
+.fmrseo-method-option input[type="radio"] {
+  margin-right: 8px;
+}
+
+.fmrseo-method-option span {
+  font-weight: 500;
+}
+
+.fmrseo-credits-info {
+  display: block;
+  margin-left: 24px;
+  margin-top: 4px;
+  color: #1dbded;
+  font-size: 12px;
+}
+
+.fmrseo-ai-cost-info {
+  color: #ea8b46;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.fmrseo-ai-badge {
+  background-color: #1dbded;
+  color: #0b0a08;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 8px;
+  text-transform: uppercase;
+}
+
+.fmrseo-ai-summary {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #191816;
+  border: 1px solid #2c2b29;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.fmrseo-ai-summary p {
+  margin: 0 0 8px 0;
+  color: #a1a1aa;
+}
+
+.fmrseo-ai-summary p:last-child {
+  margin-bottom: 0;
+}
+
 /* Responsive tweaks */
 @media (max-width: 600px) {
   .fmrseo-modal-content {

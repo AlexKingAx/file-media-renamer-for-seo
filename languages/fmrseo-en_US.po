@@ -9,4 +9,122 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"# AI 
+Configuration strings
+msgid "AI Configuration"
+msgstr "AI Configuration"
+
+msgid "Enable AI Renaming"
+msgstr "Enable AI Renaming"
+
+msgid "Enable AI-powered automatic media renaming functionality."
+msgstr "Enable AI-powered automatic media renaming functionality."
+
+msgid "API Key"
+msgstr "API Key"
+
+msgid "Enter your AI service API key for content analysis and name generation."
+msgstr "Enter your AI service API key for content analysis and name generation."
+
+msgid "Credit Balance"
+msgstr "Credit Balance"
+
+msgid "Current available credits for AI operations."
+msgstr "Current available credits for AI operations."
+
+msgid "API Timeout (seconds)"
+msgstr "API Timeout (seconds)"
+
+msgid "Timeout for AI API requests in seconds (default: 30)."
+msgstr "Timeout for AI API requests in seconds (default: 30)."
+
+msgid "Max Retries"
+msgstr "Max Retries"
+
+msgid "Maximum number of retry attempts for failed AI requests (default: 2)."
+msgstr "Maximum number of retry attempts for failed AI requests (default: 2)."
+
+msgid "Configure AI-powered automatic media renaming settings. AI functionality requires a valid API key and sufficient credits."
+msgstr "Configure AI-powered automatic media renaming settings. AI functionality requires a valid API key and sufficient credits."
+
+msgid "✓ API Key is valid"
+msgstr "✓ API Key is valid"
+
+msgid "✗ API Key validation failed"
+msgstr "✗ API Key validation failed"
+
+msgid "Enter a valid API key to view credit balance."
+msgstr "Enter a valid API key to view credit balance."
+
+msgid "Available Credits: %d"
+msgstr "Available Credits: %d"
+
+msgid "Total Credits Used: %d"
+msgstr "Total Credits Used: %d"
+
+msgid "Unable to retrieve credit balance. Please check your API key."
+msgstr "Unable to retrieve credit balance. Please check your API key."
+
+msgid "Invalid API key. Please check your key and try again."
+msgstr "Invalid API key. Please check your key and try again."# AI Rename
+ Button and Modal strings
+msgid "Rename with AI"
+msgstr "Rename with AI"
+
+msgid "Processing with AI..."
+msgstr "Processing with AI..."
+
+msgid "AI processing failed"
+msgstr "AI processing failed"
+
+msgid "Renamed successfully"
+msgstr "Renamed successfully"
+
+msgid "Insufficient credits"
+msgstr "Insufficient credits"
+
+msgid "AI Rename Suggestions"
+msgstr "AI Rename Suggestions"
+
+msgid "Select a suggested name for your media file:"
+msgstr "Select a suggested name for your media file:"
+
+msgid "Preview:"
+msgstr "Preview:"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Apply Rename"
+msgstr "Apply Rename"
+
+msgid "Please select a suggestion"
+msgstr "Please select a suggestion"
+
+msgid "Applying..."
+msgstr "Applying..."
+
+# AI Error Messages
+msgid "Nonce verification failed."
+msgstr "Nonce verification failed."
+
+msgid "Insufficient permissions."
+msgstr "Insufficient permissions."
+
+msgid "Invalid media ID."
+msgstr "Invalid media ID."
+
+msgid "AI functionality is not enabled."
+msgstr "AI functionality is not enabled."
+
+msgid "Insufficient credits for AI rename."
+msgstr "Insufficient credits for AI rename."
+
+msgid "Failed to generate AI suggestions."
+msgstr "Failed to generate AI suggestions."
+
+msgid "File renamed successfully with AI."
+msgstr "File renamed successfully with AI."
+
+msgid "File renamed using fallback method (AI unavailable)."
+msgstr "File renamed using fallback method (AI unavailable)."

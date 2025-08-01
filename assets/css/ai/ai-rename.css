@@ -1,0 +1,286 @@
+/**
+ * AI Rename CSS for FMR SEO
+ * Basic styling for AI rename functionality
+ */
+
+/* AI Rename Button */
+#ai-rename-button,
+.ai-rename-button {
+    background-color: #0073aa;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 5px;
+}
+
+#ai-rename-button:hover,
+.ai-rename-button:hover {
+    background-color: #005a87;
+}
+
+#ai-rename-button:disabled,
+.ai-rename-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* AI Status Indicators */
+.fmrseo-ai-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.fmrseo-ai-indicator.available {
+    background-color: #46b450;
+}
+
+.fmrseo-ai-indicator.unavailable {
+    background-color: #dc3232;
+}
+
+.fmrseo-ai-indicator.warning {
+    background-color: #ffb900;
+}
+
+/* Loading Animation */
+.fmrseo-loading-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #0073aa;
+    border-radius: 50%;
+    animation: fmrseo-spin 1s linear infinite;
+    margin-right: 5px;
+}
+
+@keyframes fmrseo-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* AI Suggestions Modal */
+.fmrseo-ai-modal {
+    display: none;
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.fmrseo-ai-modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.fmrseo-ai-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f9f9f9;
+    border-radius: 4px 4px 0 0;
+}
+
+.fmrseo-ai-modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #23282d;
+}
+
+.fmrseo-ai-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fmrseo-ai-modal-close:hover {
+    color: #000;
+}
+
+.fmrseo-ai-modal-body {
+    padding: 24px;
+}
+
+.fmrseo-ai-modal-description {
+    margin-bottom: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.fmrseo-ai-suggestions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.fmrseo-ai-suggestion-item {
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.fmrseo-ai-suggestion-item:hover {
+    border-color: #0073aa;
+    background-color: #f8f9fa;
+}
+
+.fmrseo-ai-suggestion-item.selected {
+    border-color: #0073aa;
+    background-color: #e7f3ff;
+}
+
+.fmrseo-ai-suggestion-item input[type="radio"] {
+    margin-right: 10px;
+}
+
+.fmrseo-ai-suggestion-name {
+    font-weight: 600;
+    color: #23282d;
+    font-size: 14px;
+}
+
+.fmrseo-ai-suggestion-preview {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.fmrseo-ai-preview-section {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border-left: 4px solid #0073aa;
+}
+
+.fmrseo-ai-preview-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #23282d;
+    font-size: 14px;
+}
+
+.fmrseo-ai-preview-filename {
+    font-family: monospace;
+    background-color: #fff;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    color: #0073aa;
+    font-size: 13px;
+}
+
+.fmrseo-ai-modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #ddd;
+    background-color: #f9f9f9;
+    border-radius: 0 0 4px 4px;
+    text-align: right;
+}
+
+.fmrseo-ai-modal-footer .button {
+    margin-left: 10px;
+}
+
+.fmrseo-ai-modal-footer .button-primary {
+    background-color: #0073aa;
+    border-color: #0073aa;
+}
+
+.fmrseo-ai-modal-footer .button-primary:hover {
+    background-color: #005a87;
+    border-color: #005a87;
+}
+
+.fmrseo-ai-modal-footer .button-primary:disabled {
+    background-color: #ccc !important;
+    border-color: #ccc !important;
+    cursor: not-allowed;
+}
+
+/* Loading state for modal */
+.fmrseo-ai-modal-loading {
+    text-align: center;
+    padding: 40px 24px;
+}
+
+.fmrseo-ai-modal-loading .fmrseo-loading-spinner {
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+    margin-right: 10px;
+}
+
+.fmrseo-ai-modal-error {
+    background-color: #fff2f2;
+    border-left: 4px solid #dc3232;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.fmrseo-ai-modal-error-message {
+    color: #dc3232;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.fmrseo-ai-modal-error-details {
+    color: #666;
+    font-size: 13px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .fmrseo-ai-modal-content {
+        width: 95%;
+        margin: 2% auto;
+    }
+    
+    .fmrseo-ai-modal-header,
+    .fmrseo-ai-modal-body,
+    .fmrseo-ai-modal-footer {
+        padding: 15px;
+    }
+    
+    .fmrseo-ai-modal-footer {
+        text-align: center;
+    }
+    
+    .fmrseo-ai-modal-footer .button {
+        margin: 5px;
+        width: 100px;
+    }
+}

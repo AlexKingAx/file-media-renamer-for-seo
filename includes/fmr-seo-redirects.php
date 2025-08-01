@@ -3,6 +3,10 @@
  * Redirects management for File Media Renamer for SEO
  */
 
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly
+}
+
 /**
  * Initializes the fmrseo_redirects option on plugin activation.
  *

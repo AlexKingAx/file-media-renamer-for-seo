@@ -1,0 +1,353 @@
+/**
+ * Admin Settings Styles
+ * File Media Renamer for SEO
+ */
+
+/* Credit Balance Display */
+.fmrseo-credit-balance {
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-top: 5px;
+    display: inline-block;
+    min-width: 200px;
+}
+
+.fmrseo-credit-balance.positive {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.fmrseo-credit-balance.warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+.fmrseo-credit-balance.error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+/* AI Statistics in Settings */
+.fmrseo-ai-statistics {
+    max-width: 800px;
+    margin-top: 20px;
+}
+
+.fmrseo-stats-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #e1e1e1;
+}
+
+.fmrseo-stats-section h4 {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #23282d;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.fmrseo-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.fmrseo-stat-box {
+    background: #fff;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.fmrseo-stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0073aa;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.fmrseo-stat-label {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Recent Transactions */
+.fmrseo-recent-transactions {
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.fmrseo-transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.fmrseo-transaction-item:last-child {
+    border-bottom: none;
+}
+
+.fmrseo-transaction-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.fmrseo-transaction-file {
+    font-weight: 500;
+    font-size: 13px;
+    color: #23282d;
+}
+
+.fmrseo-transaction-date {
+    font-size: 11px;
+    color: #666;
+}
+
+.fmrseo-transaction-credits {
+    font-weight: bold;
+    color: #dc3232;
+    font-size: 12px;
+}
+
+/* Stats Actions */
+.fmrseo-stats-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fmrseo-stats-actions .button {
+    font-size: 12px;
+    padding: 6px 12px;
+    height: auto;
+}
+
+/* Disabled State */
+.fmrseo-stats-disabled {
+    padding: 20px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    text-align: center;
+    color: #666;
+}
+
+/* Settings Form Enhancements */
+.form-table th {
+    width: 200px;
+}
+
+.form-table td {
+    padding: 15px 10px;
+}
+
+.form-table .description {
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* API Key Field */
+.fmrseo-api-key-field {
+    position: relative;
+}
+
+.fmrseo-api-key-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+}
+
+.fmrseo-api-key-toggle:hover {
+    color: #0073aa;
+}
+
+/* Settings Sections */
+.fmrseo-settings-section {
+    margin-bottom: 30px;
+}
+
+.fmrseo-settings-section h3 {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e1e1e1;
+    color: #23282d;
+}
+
+/* Help Text */
+.fmrseo-help-text {
+    background: #f0f8ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.fmrseo-help-text .dashicons {
+    color: #0073aa;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* Warning Messages */
+.fmrseo-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+    color: #856404;
+}
+
+.fmrseo-warning .dashicons {
+    color: #856404;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* Success Messages */
+.fmrseo-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+    color: #155724;
+}
+
+.fmrseo-success .dashicons {
+    color: #155724;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* Error Messages */
+.fmrseo-error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+    color: #721c24;
+}
+
+.fmrseo-error .dashicons {
+    color: #721c24;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* Responsive Design */
+@media (max-width: 782px) {
+    .fmrseo-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .fmrseo-stats-actions {
+        flex-direction: column;
+    }
+    
+    .fmrseo-stats-actions .button {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .fmrseo-transaction-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .form-table th,
+    .form-table td {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+    }
+    
+    .form-table th {
+        border-bottom: none;
+        padding-bottom: 5px;
+    }
+}
+
+/* Loading States */
+.fmrseo-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.fmrseo-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #0073aa;
+    border-radius: 50%;
+    animation: fmrseo-spin 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes fmrseo-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.fmrseo-hidden {
+    display: none !important;
+}
+
+.fmrseo-text-center {
+    text-align: center;
+}
+
+.fmrseo-text-left {
+    text-align: left;
+}
+
+.fmrseo-text-right {
+    text-align: right;
+}
+
+.fmrseo-mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.fmrseo-mt-10 {
+    margin-top: 10px !important;
+}
+
+.fmrseo-mt-20 {
+    margin-top: 20px !important;
+}

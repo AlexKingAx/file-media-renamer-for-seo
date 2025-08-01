@@ -175,3 +175,121 @@ msgid "Simple and speedy plug-in for help your SEO"
 msgstr ""
 "\n"
 "Plug-in semplice e veloce per aiutare il tuo SEO"
+# AI Configuration strings
+msgid "AI Configuration"
+msgstr "Configurazione AI"
+
+msgid "Enable AI Renaming"
+msgstr "Abilita Rinomina AI"
+
+msgid "Enable AI-powered automatic media renaming functionality."
+msgstr "Abilita la funzionalità di rinomina automatica dei media basata su AI."
+
+msgid "API Key"
+msgstr "Chiave API"
+
+msgid "Enter your AI service API key for content analysis and name generation."
+msgstr "Inserisci la tua chiave API del servizio AI per l'analisi del contenuto e la generazione dei nomi."
+
+msgid "Credit Balance"
+msgstr "Saldo Crediti"
+
+msgid "Current available credits for AI operations."
+msgstr "Crediti attualmente disponibili per le operazioni AI."
+
+msgid "API Timeout (seconds)"
+msgstr "Timeout API (secondi)"
+
+msgid "Timeout for AI API requests in seconds (default: 30)."
+msgstr "Timeout per le richieste API AI in secondi (predefinito: 30)."
+
+msgid "Max Retries"
+msgstr "Tentativi Massimi"
+
+msgid "Maximum number of retry attempts for failed AI requests (default: 2)."
+msgstr "Numero massimo di tentativi per le richieste AI fallite (predefinito: 2)."
+
+msgid "Configure AI-powered automatic media renaming settings. AI functionality requires a valid API key and sufficient credits."
+msgstr "Configura le impostazioni di rinomina automatica dei media basata su AI. La funzionalità AI richiede una chiave API valida e crediti sufficienti."
+
+msgid "✓ API Key is valid"
+msgstr "✓ La chiave API è valida"
+
+msgid "✗ API Key validation failed"
+msgstr "✗ Validazione della chiave API fallita"
+
+msgid "Enter a valid API key to view credit balance."
+msgstr "Inserisci una chiave API valida per visualizzare il saldo crediti."
+
+msgid "Available Credits: %d"
+msgstr "Crediti Disponibili: %d"
+
+msgid "Total Credits Used: %d"
+msgstr "Crediti Totali Utilizzati: %d"
+
+msgid "Unable to retrieve credit balance. Please check your API key."
+msgstr "Impossibile recuperare il saldo crediti. Controlla la tua chiave API."
+
+msgid "Invalid API key. Please check your key and try again."
+msgstr "Chiave API non valida. Controlla la tua chiave e riprova."#
+ AI Rename Button and Modal strings
+msgid "Rename with AI"
+msgstr "Rinomina con AI"
+
+msgid "Processing with AI..."
+msgstr "Elaborazione con AI..."
+
+msgid "AI processing failed"
+msgstr "Elaborazione AI fallita"
+
+msgid "Renamed successfully"
+msgstr "Rinominato con successo"
+
+msgid "Insufficient credits"
+msgstr "Crediti insufficienti"
+
+msgid "AI Rename Suggestions"
+msgstr "Suggerimenti AI per Rinomina"
+
+msgid "Select a suggested name for your media file:"
+msgstr "Seleziona un nome suggerito per il tuo file media:"
+
+msgid "Preview:"
+msgstr "Anteprima:"
+
+msgid "Cancel"
+msgstr "Annulla"
+
+msgid "Apply Rename"
+msgstr "Applica Rinomina"
+
+msgid "Please select a suggestion"
+msgstr "Seleziona un suggerimento"
+
+msgid "Applying..."
+msgstr "Applicazione in corso..."
+
+# AI Error Messages
+msgid "Nonce verification failed."
+msgstr "Verifica nonce fallita."
+
+msgid "Insufficient permissions."
+msgstr "Permessi insufficienti."
+
+msgid "Invalid media ID."
+msgstr "ID media non valido."
+
+msgid "AI functionality is not enabled."
+msgstr "La funzionalità AI non è abilitata."
+
+msgid "Insufficient credits for AI rename."
+msgstr "Crediti insufficienti per la rinomina AI."
+
+msgid "Failed to generate AI suggestions."
+msgstr "Impossibile generare suggerimenti AI."
+
+msgid "File renamed successfully with AI."
+msgstr "File rinominato con successo con AI."
+
+msgid "File renamed using fallback method (AI unavailable)."
+msgstr "File rinominato usando il metodo di fallback (AI non disponibile)."
