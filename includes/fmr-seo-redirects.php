@@ -1,14 +1,22 @@
 <?php
+
 /**
  * Redirects management for File Media Renamer for SEO
  */
+
+
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly
+}
+
 
 /**
  * Initializes the fmrseo_redirects option on plugin activation.
  *
  * @return void
  */
-function fmrseo_initialize_redirects_option() {
+function fmrseo_initialize_redirects_option()
+{
     if (false === get_option('fmrseo_redirects', false)) {
         add_option('fmrseo_redirects', []);
         error_log('[FMRSEO Init] Redirects option initialized.');
@@ -24,7 +32,8 @@ function fmrseo_initialize_redirects_option() {
  * @param string $new_url The new media URL.
  * @return void
  */
-function fmrseo_add_redirect($old_url, $new_url) {
+function fmrseo_add_redirect($old_url, $new_url)
+{
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'fmrseo_redirects';
@@ -63,7 +72,8 @@ function fmrseo_add_redirect($old_url, $new_url) {
  *
  * @return void
  */
-function fmrseo_check_image_redirect() {
+function fmrseo_check_image_redirect()
+{
     // Avoid running redirects in the admin area.
     if (is_admin()) {
         error_log('[FMRSEO Redirect] Skipped: Admin area');

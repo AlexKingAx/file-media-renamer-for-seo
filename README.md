@@ -6,7 +6,7 @@
 **License:** GPL-2.0+  
 **License URI:** https://www.gnu.org/licenses/old-licenses/gpl-2.0.html  
 **Plugin URI:** https://filemediarenamerwp.com/  
-**Tags:** media file renamer, rename media files, image SEO, media SEO, alt text, rename images, SEO optimization, media library, media management, SEO plugin, image optimization, WordPress SEO
+**Tags:** rename media files, image titles, alt text, bulk rename images, image SEO
 
 ## Description
 

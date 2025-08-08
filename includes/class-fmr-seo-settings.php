@@ -1,7 +1,16 @@
 <?php
-class File_Media_Renamer_SEO_Settings {
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly
+}
 
-    public function __construct() {
+/**
+ * File Media Renamer class for Plugin Settings
+ */
+class File_Media_Renamer_SEO_Settings
+{
+
+    public function __construct()
+    {
         add_action('admin_menu', array($this, 'add_settings_page'));
         add_action('admin_init', array($this, 'register_settings'));
     }
@@ -9,7 +18,8 @@ class File_Media_Renamer_SEO_Settings {
     /**
      * Adds a settings page under the Media menu.
      */
-    public function add_settings_page() {
+    public function add_settings_page()
+    {
         add_submenu_page(
             'upload.php', // Parent slug
             __('File Media Renamer Settings', 'fmrseo'), // Page title
@@ -23,7 +33,8 @@ class File_Media_Renamer_SEO_Settings {
     /**
      * Registers plugin settings and adds settings fields.
      */
-    public function register_settings() {
+    public function register_settings()
+    {
         register_setting('fmrseo', 'fmrseo_options');
 
         add_settings_section(
@@ -65,10 +76,11 @@ class File_Media_Renamer_SEO_Settings {
      *
      * @param array $args Arguments passed by WordPress.
      */
-    public function settings_section_callback($args) {
-        ?>
+    public function settings_section_callback($args)
+    {
+?>
         <p id="<?php echo esc_attr($args['id']); ?>"><?php esc_html_e('Configure the settings for File Media Renamer for SEO.', 'fmrseo'); ?></p>
-        <?php
+    <?php
     }
 
     /**
@@ -76,25 +88,27 @@ class File_Media_Renamer_SEO_Settings {
      *
      * @param array $args Arguments passed by WordPress.
      */
-    public function checkbox_callback($args) {
+    public function checkbox_callback($args)
+    {
         $options = get_option('fmrseo_options');
         $checked = isset($options[$args['label_for']]) ? $options[$args['label_for']] : false;
-        ?>
+    ?>
         <input type="checkbox"
-               id="<?php echo esc_attr($args['label_for']); ?>"
-               name="fmrseo_options[<?php echo esc_attr($args['label_for']); ?>]"
-               value="1"
-               <?php checked($checked, 1); ?>>
+            id="<?php echo esc_attr($args['label_for']); ?>"
+            name="fmrseo_options[<?php echo esc_attr($args['label_for']); ?>]"
+            value="1"
+            <?php checked($checked, 1); ?>>
         <label for="<?php echo esc_attr($args['label_for']); ?>">
             <?php echo esc_html($args['description']); ?>
         </label>
-        <?php
+    <?php
     }
 
     /**
      * Renders the settings page content.
      */
-    public function settings_page_content() {
+    public function settings_page_content()
+    {
         if (!current_user_can('manage_options')) {
             return;
         }
@@ -104,7 +118,7 @@ class File_Media_Renamer_SEO_Settings {
         }
 
         settings_errors('fmrseo_messages');
-        ?>
+    ?>
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             <form action="options.php" method="post">
@@ -115,6 +129,6 @@ class File_Media_Renamer_SEO_Settings {
                 ?>
             </form>
         </div>
-        <?php
+<?php
     }
 }

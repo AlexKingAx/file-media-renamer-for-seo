@@ -66,27 +66,5 @@ jQuery(document).ready(function ($) {
         $("#attachments-" + post_id + "-image_seo_name").val(old_v);
 
     }
-    
-
-    // if (!confirm("Are you sure you want to undo the last rename?")) return;
-    //   $.post(
-    //       renameMedia.ajax_url,
-    //       {
-    //           action: "fmrseo_undo_last_rename",
-    //           post_id: post_id,
-    //           _ajax_nonce: renameMedia.nonce,
-    //       },
-    //       function (response) {
-    //           if (response.success) {
-    //               alert(response.data.message);
-    //               // Update the input field and file URL if needed
-    //               $("#attachment-details-two-column-copy-link").val(response.data.url);
-    //               // Optionally reload the page or update the thumbnail
-    //               location.reload();
-    //           } else {
-    //               alert(response.data.message);
-    //           }
-    //       }
-    //   );
   });
 });
