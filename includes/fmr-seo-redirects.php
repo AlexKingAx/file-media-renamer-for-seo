@@ -13,16 +13,20 @@ if (!defined('ABSPATH')) {
 /**
  * Initializes the fmrseo_redirects option on plugin activation.
  *
- * @return void
+  * @return true|WP_Error
  */
 function fmrseo_initialize_redirects_option()
 {
     if (false === get_option('fmrseo_redirects', false)) {
-        add_option('fmrseo_redirects', []);
-        error_log('[FMRSEO Init] Redirects option initialized.');
-    } else {
-        error_log('[FMRSEO Init] Redirects option already exists.');
+        $added = add_option('fmrseo_redirects', []);
+        if (!$added) {
+            return new WP_Error(
+                'fmrseo_option_init_failed',
+                __('FMRSEO: Failed to initialize redirects option.', 'fmrseo')
+            );
+        }
     }
+    return true;
 }
 
 /**
@@ -30,7 +34,7 @@ function fmrseo_initialize_redirects_option()
  *
  * @param string $old_url The original media URL.
  * @param string $new_url The new media URL.
- * @return void
+ * @return true|WP_Error
  */
 function fmrseo_add_redirect($old_url, $new_url)
 {
@@ -48,23 +52,34 @@ function fmrseo_add_redirect($old_url, $new_url)
 
     if ($existing_redirect) {
         // Update the existing redirect
-        $wpdb->update(
+        $updated = $wpdb->update(
             $table_name,
             ['new_url' => $new_url],
             ['old_url' => $old_url],
             ['%s'],
             ['%s']
         );
-        error_log('[FMRSEO Add Redirect] Redirect updated: ' . $old_url . ' → ' . $new_url);
+        if ($updated === false) {
+            return new WP_Error(
+                'fmrseo_update_failed',
+                __('FMRSEO: Failed to update redirect.', 'fmrseo')
+            );
+        }
     } else {
         // Insert a new redirect
-        $wpdb->insert(
+        $inserted = $wpdb->insert(
             $table_name,
             ['old_url' => $old_url, 'new_url' => $new_url],
             ['%s', '%s']
         );
-        error_log('[FMRSEO Add Redirect] New redirect added: ' . $old_url . ' → ' . $new_url);
+        if ($inserted === false) {
+            return new WP_Error(
+                'fmrseo_insert_failed',
+                __('FMRSEO: Failed to insert redirect.', 'fmrseo')
+            );
+        }
     }
+    return true;
 }
 
 /**
@@ -76,7 +91,6 @@ function fmrseo_check_image_redirect()
 {
     // Avoid running redirects in the admin area.
     if (is_admin()) {
-        error_log('[FMRSEO Redirect] Skipped: Admin area');
         return;
     }
 
@@ -97,12 +111,9 @@ function fmrseo_check_image_redirect()
 
     // If a redirect is found, perform a 301 redirect
     if ($redirect) {
-        error_log('[FMRSEO Redirect] Match found: ' . $current_url . ' → ' . $redirect->new_url);
         wp_redirect($redirect->new_url, 301);
         exit;
     }
-
-    error_log('[FMRSEO Redirect] No match found for: ' . $current_url);
 }
 
 // Hook into template_redirect to catch frontend requests before template rendering.

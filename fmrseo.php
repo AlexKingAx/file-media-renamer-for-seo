@@ -1,18 +1,28 @@
 <?php
 
 /**
- * Plugin Name: File Media Renamer for SEO
+ * Plugin Name: File Media Renamer for SEO.
+ * Plugin URI: https://filemediarenamerwp.com/
  * Description: A lightweight, fast plugin that improves SEO and streamlines your media workflow.
  * Version: 0.7.1
- * Author: alex-web
+ * Author: Alex-Web
+ * Author URI: https://alex-web.it/
+ * Developer: Alex-Web
+ * Developer URI: https://alex-web.it/
  * Text Domain: fmrseo
  * Domain Path: /languages
+ * 
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
 
+// Include the settings file
+require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-redirects.php';
+require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-bulk-rename.php';
+
 if (! defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+    exit;
 }
 
 // Upload the text domain
@@ -22,10 +32,6 @@ function fmrseo_load_textdomain()
 }
 add_action('plugins_loaded', 'fmrseo_load_textdomain');
 
-// Include the settings file
-require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-settings.php';
-require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-redirects.php';
-require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-bulk-rename.php';
 
 // Initialize the settings
 function fmrseo_init_settings()
@@ -131,12 +137,6 @@ function frmseo_add_image_seo_name_attachment_field_to_attachment_fields_to_edit
             'input' => 'html',
             'html'  => $ul,
         );
-
-        // $form_fields['undo_button'] = array(
-        //     'input' => 'html',
-        //     'html' => '<button id="undo-seo-rename" class="button" media-id="' . esc_attr($post->ID) . '">' . __('Undo Rename', 'fmrseo') . '</button>',
-        //     'label' => ''
-        // );
     }
 
     return $form_fields;
@@ -166,12 +166,10 @@ function frmseo_frmseo_enqueue_custom_admin_script()
  */
 function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
 {
-    error_log("miao");
-    error_log("Is_____restore: " . ($is_restore ? 'true' : 'false'));
     $file_path = get_attached_file($post_id);
 
     if (!$file_path) {
-        throw new Exception(__('File path not found.', 'fmrseo'));
+        return new WP_Error('fmrseo_file_path_not_found', __('File path not found.', 'fmrseo'));
     }
 
     $file_dir = pathinfo($file_path, PATHINFO_DIRNAME);
@@ -179,14 +177,14 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
     $new_file_path = trailingslashit($file_dir) . $seo_name . '.' . $file_ext;
 
     if (!file_exists($file_path)) {
-        throw new Exception(__('Original file does not exist.', 'fmrseo'));
+        return new WP_Error('fmrseo_original_file_missing', __('Original file does not exist.', 'fmrseo'));
     }
 
     $unique = null;
     // Check if the new file path is the same as the current file path
     if (file_exists($new_file_path) && $file_path !== $new_file_path) {
         // If the new file already exists and if not restoring, return an exception
-        if (!$is_restore) throw new Exception(__('A file with the new name and the same file extension already exists. Change it or add a number!', 'fmrseo'));
+        if (!$is_restore) return new WP_Error('fmrseo_file_exists', __('A file with the new name and the same file extension already exists. Change it or add a number!', 'fmrseo'));
         else {
             $unique = wp_unique_filename($file_dir, $seo_name . '.' . $file_ext);
             $new_file_path = trailingslashit($file_dir) . $unique;
@@ -199,7 +197,7 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
     // Rename file if needed
     if ($file_path !== $new_file_path) {
         if (!rename($file_path, $new_file_path)) {
-            throw new Exception(__('Failed to rename the file.', 'fmrseo'));
+            return new WP_Error('fmrseo_rename_failed', __('Failed to rename the file.', 'fmrseo'));
         }
     }
 
@@ -355,15 +353,13 @@ function frmseo_save_seo_name_ajax()
 function frmseo_update_content_image_references_background($old_url, $new_url, $seo_name, $post_id)
 {
     global $wpdb;
-    error_log("POST");
-    error_log(json_encode($post_id));
 
     // Update post_name, and metadata if post_id is provided
     if ($post_id) {
 
         $post_data = get_post($post_id);
 
-        // Aggiorna il post_name e il guid
+        // Aggiorna il post_name
         wp_update_post([
             'ID' => $post_id,
             'post_name' => $seo_name,
@@ -377,15 +373,7 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
             $wp_attachment_metadata['file'] = str_replace(basename($wp_attachment_metadata['file']), $seo_name . '.' . $file_extension, $wp_attachment_metadata['file']);
         }
 
-        // Log updated metadata
-        error_log("attached_metadata updated");
-        error_log(json_encode($wp_attachment_metadata));
-
         update_post_meta($post_id, '_wp_attachment_metadata', $wp_attachment_metadata);
-
-        // Log updated post data
-        error_log("POST DATA updated");
-        error_log(json_encode(get_post($post_id)));
 
         // Retrieve saved settings
         $options = get_option('fmrseo_options');
@@ -415,19 +403,13 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
         wp_cache_delete($post_data->post_name, 'posts');
     }
 
-    error_log('Test di logging: questa è una prova!');
-
     $old_url_escaped = '%' . $wpdb->esc_like($old_url) . '%';
 
     // Search for the old URL in post_content of wp_posts
     $sql = "SELECT ID, post_content FROM {$wpdb->posts} WHERE
                 post_content LIKE '{$old_url_escaped}'";
 
-    error_log($sql);
-
     $posts = $wpdb->get_results($sql);
-
-    error_log(json_encode($posts));
 
     foreach ($posts as $post) {
         $updated_content = frmseo_update_serialized_data($post->post_content, $old_url, $new_url);
@@ -446,17 +428,10 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
 
     $query_meta = "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value LIKE '{$old_url_escaped}'";
 
-    error_log("query_meta");
-    error_log($query_meta);
-
     $postmeta = $wpdb->get_results($query_meta);
-
-    error_log(json_encode($postmeta));
 
     foreach ($postmeta as $meta) {
         $updated_meta_value = frmseo_update_serialized_data($meta->meta_value, $old_url, $new_url);
-        error_log($meta->meta_value);
-        error_log($updated_meta_value);
 
         $wpdb->update(
             $wpdb->postmeta,
@@ -573,63 +548,3 @@ function fmrseo_drop_redirects_table()
     $wpdb->query("DROP TABLE IF EXISTS $table_name");
 }
 register_deactivation_hook(__FILE__, 'fmrseo_drop_redirects_table');
-
-// /**
-//  * AJAX handler to undo the last rename (revert to previous version).
-//  */
-// function fmrseo_undo_last_rename_ajax() {
-//     try {
-//         if (!isset($_POST['_ajax_nonce']) || !wp_verify_nonce($_POST['_ajax_nonce'], 'save_seo_name_nonce')) {
-//             throw new Exception(__('Nonce verification failed.', 'fmrseo'));
-//         }
-//         $post_id = intval($_POST['post_id']);
-//         if (!$post_id) throw new Exception(__('Invalid media ID.', 'fmrseo'));
-
-//         $history = get_post_meta($post_id, '_fmrseo_rename_history', true);
-//         if (!is_array($history) || count($history) < 1) {
-//             throw new Exception(__('No previous version to revert to.', 'fmrseo'));
-//         }
-//         $previous = array_shift($history); // Get the most recent previous version
-
-//         $current_file_path = get_attached_file($post_id);
-//         $current_file_url = str_replace(wp_upload_dir()['basedir'], wp_upload_dir()['baseurl'], $current_file_path);
-
-//         // Rename current file back to previous
-//         if (!file_exists($previous['file_path'])) {
-//             // If the previous file does not exist, try to rename current to previous
-//             if (!rename($current_file_path, $previous['file_path'])) {
-//                 throw new Exception(__('Failed to revert file name.', 'fmrseo'));
-//             }
-//         } else {
-//             // If previous file exists, swap files (optional: could delete current)
-//             @unlink($current_file_path);
-//         }
-
-//         update_attached_file($post_id, $previous['file_path']);
-
-//         // Update post meta and title if needed
-//         update_post_meta($post_id, 'image_seo_name', $previous['seo_name']);
-//         $options = get_option('fmrseo_options');
-//         if (isset($options['rename_title']) && $options['rename_title'] == 1) {
-//             wp_update_post(['ID' => $post_id, 'post_title' => $previous['seo_name']]);
-//         }
-//         if (isset($options['rename_alt_text']) && $options['rename_alt_text'] == 1) {
-//             update_post_meta($post_id, '_wp_attachment_image_alt', $previous['seo_name']);
-//         }
-
-//         // Remove this version from history and update
-//         update_post_meta($post_id, '_fmrseo_rename_history', $history);
-
-//         // Add redirect from current to previous
-//         fmrseo_add_redirect($current_file_url, $previous['file_url']);
-
-//         wp_send_json_success([
-//             'message' => __('Reverted to previous version.', 'fmrseo'),
-//             'url'     => $previous['file_url'],
-//             'filename'=> basename($previous['file_path']),
-//         ]);
-//     } catch (Exception $e) {
-//         wp_send_json_error(['message' => $e->getMessage()]);
-//     }
-// }
-// add_action('wp_ajax_fmrseo_undo_last_rename', 'fmrseo_undo_last_rename_ajax');
