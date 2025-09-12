@@ -3,7 +3,7 @@ Contributors: alex-web
 Donate link: https://filemediarenamerwp.com/
 Tags: rename media files, image titles, alt text, bulk rename images, image seo
 Requires at least: 4.0
-Tested up to: 6.6
+Tested up to: 6.8
 Stable tag: 0.7.1
 Requires PHP: 7.0
 License: GPLv2 or later
