@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: File Media Renamer for SEO.
+ * Plugin Name: File Media Renamer for SEO
  * Plugin URI: https://filemediarenamerwp.com/
  * Description: A lightweight, fast plugin that improves SEO and streamlines your media workflow.
  * Version: 0.7.1
