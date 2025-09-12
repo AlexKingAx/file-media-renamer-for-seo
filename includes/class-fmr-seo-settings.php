@@ -35,7 +35,13 @@ class File_Media_Renamer_SEO_Settings
      */
     public function register_settings()
     {
-        register_setting('fmrseo', 'fmrseo_options');
+        register_setting(
+            'fmrseo',
+            'fmrseo_options',
+            array(
+                'sanitize_callback' => array($this, 'sanitize_options')
+            )
+        );
 
         add_settings_section(
             'fmrseo_section_developers', // ID
@@ -130,5 +136,21 @@ class File_Media_Renamer_SEO_Settings
             </form>
         </div>
 <?php
+    }
+
+    /**
+     * Sanitize options before saving.
+     */
+    public function sanitize_options($options)
+    {
+        $sanitized = array();
+
+        // Checkbox: Rename Title
+        $sanitized['rename_title'] = isset($options['rename_title']) ? (bool) $options['rename_title'] : false;
+
+        // Checkbox: Rename Alt Text
+        $sanitized['rename_alt_text'] = isset($options['rename_alt_text']) ? (bool) $options['rename_alt_text'] : false;
+
+        return $sanitized;
     }
 }
