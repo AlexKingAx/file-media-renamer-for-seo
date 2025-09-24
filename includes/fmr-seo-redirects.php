@@ -43,7 +43,7 @@ function fmrseo_add_redirect($old_url, $new_url)
     // Check if the redirect already exists
     $existing_redirect = $wpdb->get_var(
         $wpdb->prepare(
-            "SELECT COUNT(*) FROM " . $wpdb->prefix . "fmrseo_redirects WHERE old_url = %s",
+            "SELECT COUNT(*) FROM `" . $wpdb->prefix . "fmrseo_redirects` WHERE old_url = %s",
             $old_url
         )
     );
@@ -101,7 +101,7 @@ function fmrseo_check_image_redirect()
     // Check if there's a redirect for the requested URL;
     $redirect = $wpdb->get_row(
         $wpdb->prepare(
-            "SELECT * FROM ". $wpdb->prefix . "fmrseo_redirects WHERE old_url = %s",
+            "SELECT * FROM `". $wpdb->prefix . "fmrseo_redirects` WHERE old_url = %s",
             $current_url
         )
     );
