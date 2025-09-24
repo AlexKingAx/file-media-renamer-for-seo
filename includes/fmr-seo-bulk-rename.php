@@ -1,8 +1,7 @@
 <?php
-
-/**
+/**========================================================
  * Bulk rename functionality for File Media Renamer for SEO
- */
+ **========================================================*/
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly

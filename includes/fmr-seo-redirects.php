@@ -1,9 +1,7 @@
 <?php
-
-/**
+/**========================================================
  * Redirects management for File Media Renamer for SEO
- */
-
+ **========================================================*/
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
@@ -39,7 +37,7 @@ function fmrseo_initialize_redirects_option()
 function fmrseo_add_redirect($old_url, $new_url)
 {
     global $wpdb;
-
+    $table_name = $wpdb->prefix . "fmrseo_redirects";
     // Check if the redirect already exists
     $existing_redirect = $wpdb->get_var(
         $wpdb->prepare(

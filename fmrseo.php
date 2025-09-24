@@ -1,10 +1,9 @@
 <?php
-
 /**
  * Plugin Name: File Media Renamer for SEO
  * Plugin URI: https://filemediarenamerwp.com/
  * Description: A lightweight, fast plugin that improves SEO and streamlines your media workflow.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Alex-Web
  * Author URI: https://alex-web.it/
  * Developer: Alex-Web
@@ -15,14 +14,15 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 // Include the settings file
 require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-redirects.php';
 require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-bulk-rename.php';
 
-if (! defined('ABSPATH')) {
-    exit;
-}
 
 define('FMRSEO_VERSION', '1.0.0');
 

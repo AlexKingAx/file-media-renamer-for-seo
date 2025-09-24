@@ -1,11 +1,12 @@
 <?php
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-/**
+/**========================================================
  * File Media Renamer class for Plugin Settings
- */
+ **========================================================*/
 class File_Media_Renamer_SEO_Settings
 {
 
@@ -119,7 +120,9 @@ class File_Media_Renamer_SEO_Settings
             return;
         }
 
-        if (isset($_GET['settings-updated']) && check_admin_referer('fmrseo-options')) {
+        // check parameter without controlling nonce
+        // because is already done by wordpress using settings_fields()
+        if (isset($_GET['settings-updated'])) {
             add_settings_error('fmrseo_messages', 'fmrseo_message', __('Settings Saved', 'file-media-renamer-for-seo'), 'updated');
         }
 
