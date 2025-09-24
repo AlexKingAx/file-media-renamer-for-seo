@@ -22,7 +22,7 @@ function fmrseo_initialize_redirects_option()
         if (!$added) {
             return new WP_Error(
                 'fmrseo_option_init_failed',
-                __('FMRSEO: Failed to initialize redirects option.', 'fmrseo')
+                __('FMRSEO: Failed to initialize redirects option.', 'file-media-renamer-for-seo')
             );
         }
     }
@@ -60,7 +60,7 @@ function fmrseo_add_redirect($old_url, $new_url)
         if ($updated === false) {
             return new WP_Error(
                 'fmrseo_update_failed',
-                __('FMRSEO: Failed to update redirect.', 'fmrseo')
+                __('FMRSEO: Failed to update redirect.', 'file-media-renamer-for-seo')
             );
         }
     } else {
@@ -73,7 +73,7 @@ function fmrseo_add_redirect($old_url, $new_url)
         if ($inserted === false) {
             return new WP_Error(
                 'fmrseo_insert_failed',
-                __('FMRSEO: Failed to insert redirect.', 'fmrseo')
+                __('FMRSEO: Failed to insert redirect.', 'file-media-renamer-for-seo')
             );
         }
     }

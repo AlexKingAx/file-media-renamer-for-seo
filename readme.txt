@@ -4,7 +4,7 @@ Donate link: https://filemediarenamerwp.com/
 Tags: rename media files, image titles, alt text, bulk rename images, image seo
 Requires at least: 4.0
 Tested up to: 6.8
-Stable tag: 0.7.1
+Stable tag: 1.0.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -119,10 +119,11 @@ Yes. All image sizes are renamed and redirected together with the main file.
 
 == Changelog ==
 
-= 0.7.1 =
+= 1.0.0 =
 * Initial public release
 
 == Upgrade Notice ==
 
-= 0.7.1 =
+= 1.0.0 =
 First stable release of File Media Renamer for SEO. Includes safe renaming, automatic reference updates, redirects, and bulk features.
+
