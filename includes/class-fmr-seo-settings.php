@@ -11,14 +11,14 @@ class File_Media_Renamer_SEO_Settings
 
     public function __construct()
     {
-        add_action('admin_menu', array($this, 'add_settings_page'));
-        add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_menu', array($this, 'fmrseo_add_settings_page'));
+        add_action('admin_init', array($this, 'fmrseo_register_settings'));
     }
 
     /**
      * Adds a settings page under the Media menu.
      */
-    public function add_settings_page()
+    public function fmrseo_add_settings_page()
     {
         add_submenu_page(
             'upload.php', // Parent slug
@@ -26,27 +26,27 @@ class File_Media_Renamer_SEO_Settings
             __('FMR Settings', 'fmrseo'), // Menu title
             'manage_options', // Capability
             'fmrseo', // Menu slug
-            array($this, 'settings_page_content') // Callback function
+            array($this, 'fmrseo_settings_page_content') // Callback function
         );
     }
 
     /**
      * Registers plugin settings and adds settings fields.
      */
-    public function register_settings()
+    public function fmrseo_register_settings()
     {
         register_setting(
             'fmrseo',
             'fmrseo_options',
             array(
-                'sanitize_callback' => array($this, 'sanitize_options')
+                'sanitize_callback' => array($this, 'fmrseo_sanitize_options')
             )
         );
 
         add_settings_section(
             'fmrseo_section_developers', // ID
             '', // Title
-            array($this, 'settings_section_callback'), // Callback
+            array($this, 'fmrseo_settings_section_callback'), // Callback
             'fmrseo' // Page
         );
 
@@ -54,7 +54,7 @@ class File_Media_Renamer_SEO_Settings
         add_settings_field(
             'rename_title', // ID
             __('Rename Title', 'fmrseo'), // Title
-            array($this, 'checkbox_callback'), // Callback
+            array($this, 'fmrseo_checkbox_callback'), // Callback
             'fmrseo', // Page
             'fmrseo_section_developers', // Section
             array(
@@ -67,7 +67,7 @@ class File_Media_Renamer_SEO_Settings
         add_settings_field(
             'rename_alt_text', // ID
             __('Rename Alt Text', 'fmrseo'), // Title
-            array($this, 'checkbox_callback'), // Callback
+            array($this, 'fmrseo_checkbox_callback'), // Callback
             'fmrseo', // Page
             'fmrseo_section_developers', // Section
             array(
@@ -82,7 +82,7 @@ class File_Media_Renamer_SEO_Settings
      *
      * @param array $args Arguments passed by WordPress.
      */
-    public function settings_section_callback($args)
+    public function fmrseo_settings_section_callback($args)
     {
 ?>
         <p id="<?php echo esc_attr($args['id']); ?>"><?php esc_html_e('Configure the settings for File Media Renamer for SEO.', 'fmrseo'); ?></p>
@@ -94,7 +94,7 @@ class File_Media_Renamer_SEO_Settings
      *
      * @param array $args Arguments passed by WordPress.
      */
-    public function checkbox_callback($args)
+    public function fmrseo_checkbox_callback($args)
     {
         $options = get_option('fmrseo_options');
         $checked = isset($options[$args['label_for']]) ? $options[$args['label_for']] : false;
@@ -113,7 +113,7 @@ class File_Media_Renamer_SEO_Settings
     /**
      * Renders the settings page content.
      */
-    public function settings_page_content()
+    public function fmrseo_settings_page_content()
     {
         if (!current_user_can('manage_options')) {
             return;
@@ -141,7 +141,7 @@ class File_Media_Renamer_SEO_Settings
     /**
      * Sanitize options before saving.
      */
-    public function sanitize_options($options)
+    public function fmrseo_sanitize_options($options)
     {
         $sanitized = array();
 

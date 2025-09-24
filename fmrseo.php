@@ -29,7 +29,7 @@ if (! defined('ABSPATH')) {
  *
  * @return WP_Filesystem_Base|WP_Error
  */
-function frmseo_get_filesystem()
+function fmrseo_get_filesystem()
 {
     global $wp_filesystem;
 
@@ -56,9 +56,9 @@ function frmseo_get_filesystem()
  * @param bool $overwrite Whether to overwrite the destination if it exists.
  * @return true|WP_Error
  */
-function frmseo_move_file($source, $destination, $overwrite = false)
+function fmrseo_move_file($source, $destination, $overwrite = false)
 {
-    $filesystem = frmseo_get_filesystem();
+    $filesystem = fmrseo_get_filesystem();
 
     if (is_wp_error($filesystem)) {
         return $filesystem;
@@ -89,7 +89,7 @@ add_action('init', 'fmrseo_init_settings');
 /**
  * Add a settings link to the plugin action links.
  */
-function frmseo_setting_link($links)
+function fmrseo_setting_link($links)
 {
     // Add a settings link to the plugin action links
     $settings_link = '<a href="upload.php?page=fmrseo">' . __('Settings', 'fmrseo') . '</a>';
@@ -98,37 +98,37 @@ function frmseo_setting_link($links)
 
     return $links;
 }
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'frmseo_setting_link');
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'fmrseo_setting_link');
 
 
 /**
  * Main function to handle plugin hooks and filters.
  */
-function rename_media_seo_activation()
+function fmrseo_activation_hooks()
 {
     // Register the filter to add the custom field
-    add_filter('attachment_fields_to_edit', 'frmseo_add_image_seo_name_attachment_field_to_attachment_fields_to_edit', 10, 2);
+    add_filter('attachment_fields_to_edit', 'fmrseo_add_seo_name_field_to_attachment', 10, 2);
 
     // Load the custom JS file
-    add_action('admin_enqueue_scripts', 'frmseo_frmseo_enqueue_custom_admin_script');
+    add_action('admin_enqueue_scripts', 'fmrseo_enqueue_custom_admin_script');
 
     // Register the AJAX action to save the SEO name
-    add_action('wp_ajax_save_seo_name', 'frmseo_save_seo_name_ajax');
+    add_action('wp_ajax_fmrseo_save_seo_name', 'fmrseo_save_seo_name_ajax');
 
     // Hook to execute the update function when the event is scheduled
-    add_action('update_content_image_references_event', 'frmseo_update_content_image_references_background', 10, 4);
+    add_action('fmrseo_update_content_image_references_event', 'fmrseo_update_content_image_references_background', 10, 4);
 
     // Make sure WP-Cron is active
-    if (!wp_next_scheduled('wp_cron_hook')) {
-        wp_schedule_event(time(), 'hourly', 'wp_cron_hook');
+    if (!wp_next_scheduled('fmrseo_wp_cron_hook')) {
+        wp_schedule_event(time(), 'hourly', 'fmrseo_wp_cron_hook');
     }
 
     // Clean up scheduled events when they are no longer needed
-    add_action('frmseo_clear_scheduled_update_content_image_references', 'frmseo_clear_scheduled_update_content_image_references');
+    add_action('fmrseo_clear_scheduled_update_content_image_references', 'fmrseo_clear_scheduled_update_content_image_references');
 }
 
 // Hook to activate the main function
-add_action('plugins_loaded', 'rename_media_seo_activation');
+add_action('plugins_loaded', 'fmrseo_activation_hooks');
 
 /**
  * Add a custom text field to the media attachment.
@@ -137,7 +137,7 @@ add_action('plugins_loaded', 'rename_media_seo_activation');
  * @param object $post The post object.
  * @return array The modified form fields.
  */
-function frmseo_add_image_seo_name_attachment_field_to_attachment_fields_to_edit($form_fields, $post)
+function fmrseo_add_seo_name_field_to_attachment($form_fields, $post)
 {
     // Get the full name of the file
     $file_name_with_extension = basename(get_attached_file($post->ID));
@@ -145,17 +145,17 @@ function frmseo_add_image_seo_name_attachment_field_to_attachment_fields_to_edit
     // Remove the extension from the file name
     $file_name = pathinfo($file_name_with_extension, PATHINFO_FILENAME);
 
-    $image_seo_name = get_post_meta($post->ID, 'image_seo_name', true);
+    $fmrseo_image_seo_name = get_post_meta($post->ID, 'fmrseo_image_seo_name', true);
 
-    // If the custom field is empty, use the file name as the default
-    if (empty($image_seo_name)) {
-        $image_seo_name = $file_name;
+    // If the custom field is still empty, use the file name as the default
+    if (empty($fmrseo_image_seo_name)) {
+        $fmrseo_image_seo_name = $file_name;
     }
 
-    $form_fields['image_seo_name'] = array(
+    $form_fields['fmrseo_image_seo_name'] = array(
         'label' => __('SEO Name', 'fmrseo'),
         'input' => 'text',
-        'value' => esc_attr($image_seo_name),
+        'value' => esc_attr($fmrseo_image_seo_name),
         'helps' => __('Change image file name and path for better SEO', 'fmrseo')
     );
 
@@ -191,13 +191,13 @@ function frmseo_add_image_seo_name_attachment_field_to_attachment_fields_to_edit
 /**
  * Enqueue the plug-in script.
  */
-function frmseo_frmseo_enqueue_custom_admin_script()
+function fmrseo_enqueue_custom_admin_script()
 {
     wp_enqueue_script('jquery');
     wp_enqueue_script('rename-media', plugin_dir_url(__FILE__) . 'assets/js/rename-media.js', array('jquery'), null, true);
     wp_localize_script('rename-media', 'renameMedia', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('save_seo_name_nonce') // pass nonce
+        'nonce' => wp_create_nonce('fmrseo_save_seo_name_nonce') // pass nonce
     ));
 }
 
@@ -242,7 +242,7 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
 
     // Rename file if needed
     if ($file_path !== $new_file_path) {
-        $move_result = frmseo_move_file($file_path, $new_file_path);
+        $move_result = fmrseo_move_file($file_path, $new_file_path);
         if (is_wp_error($move_result)) {
             return $move_result;
         }
@@ -267,7 +267,7 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
             $new_thumbnail_path = trailingslashit($file_dir) . $thumbnail_name;
 
             if (file_exists($old_thumbnail_path) && $old_thumbnail_path !== $new_thumbnail_path) {
-                $thumbnail_move = frmseo_move_file($old_thumbnail_path, $new_thumbnail_path);
+                $thumbnail_move = fmrseo_move_file($old_thumbnail_path, $new_thumbnail_path);
                 if (is_wp_error($thumbnail_move)) {
                     continue;
                 }
@@ -278,7 +278,7 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
                 fmrseo_add_redirect($old_thumbnail_url, $new_thumbnail_url);
 
                 $metadata['sizes'][$size]['file'] = $thumbnail_name;
-                frmseo_schedule_update_content_image_references($old_thumbnail_url, $new_thumbnail_url, $seo_name, null);
+                fmrseo_schedule_update_content_image_references($old_thumbnail_url, $new_thumbnail_url, $seo_name, null);
             }
         }
     }
@@ -287,7 +287,7 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
     wp_update_attachment_metadata($post_id, $metadata);
 
     // Schedule background refresh for full-size image
-    frmseo_schedule_update_content_image_references($old_file_url, $new_file_url, $seo_name, $post_id);
+    fmrseo_schedule_update_content_image_references($old_file_url, $new_file_url, $seo_name, $post_id);
 
     if ($unique) {
         return [
@@ -339,8 +339,8 @@ function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false
         $seo_name = $result['seo_name'];
     }
 
-    // save image_seo_name Custom Field of the plugin
-    update_post_meta($post_id, 'image_seo_name', $seo_name);
+    // save fmrseo_image_seo_name Custom Field of the plugin
+    update_post_meta($post_id, 'fmrseo_image_seo_name', $seo_name);
 
     // --- Begin: Save rename history ---
     // Add current file info to history before renaming
@@ -362,10 +362,10 @@ function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false
 /**
  * Save the SEO name via AJAX.
  */
-function frmseo_save_seo_name_ajax()
+function fmrseo_save_seo_name_ajax()
 {
     try {
-        if (!check_ajax_referer('save_seo_name_nonce', '_ajax_nonce', false)) {
+        if (!check_ajax_referer('fmrseo_save_seo_name_nonce', '_ajax_nonce', false)) {
             throw new Exception(esc_html__('Nonce verification failed.', 'fmrseo'));
         }
 
@@ -402,7 +402,7 @@ function frmseo_save_seo_name_ajax()
  * @param string $new_url The new media URL.
  * @param string $seo_name The SEO name.
  */
-function frmseo_update_content_image_references_background($old_url, $new_url, $seo_name, $post_id)
+function fmrseo_update_content_image_references_background($old_url, $new_url, $seo_name, $post_id)
 {
     global $wpdb;
 
@@ -468,7 +468,7 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
     );
 
     foreach ($posts as $post) {
-        $updated_content = frmseo_update_serialized_data($post->post_content, $old_url, $new_url);
+        $updated_content = fmrseo_update_serialized_data($post->post_content, $old_url, $new_url);
 
         $wpdb->update(
             $wpdb->posts,
@@ -486,7 +486,7 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
     $postmeta = $wpdb->get_results($wpdb->prepare("SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value LIKE %s", $old_url_escaped));
 
     foreach ($postmeta as $meta) {
-        $updated_meta_value = frmseo_update_serialized_data($meta->meta_value, $old_url, $new_url);
+        $updated_meta_value = fmrseo_update_serialized_data($meta->meta_value, $old_url, $new_url);
 
         $wpdb->update(
             $wpdb->postmeta,
@@ -508,21 +508,21 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
  * @param string $new_url The new media URL.
  * @param string $seo_name The SEO name.
  */
-function frmseo_schedule_update_content_image_references($old_url, $new_url, $seo_name, $post_id)
+function fmrseo_schedule_update_content_image_references($old_url, $new_url, $seo_name, $post_id)
 {
-    if (!wp_next_scheduled('update_content_image_references_event')) {
-        wp_schedule_single_event(time(), 'update_content_image_references_event', [$old_url, $new_url, $seo_name, $post_id]);
+    if (!wp_next_scheduled('fmrseo_update_content_image_references_event')) {
+        wp_schedule_single_event(time(), 'fmrseo_update_content_image_references_event', [$old_url, $new_url, $seo_name, $post_id]);
     }
 }
 
 /**
  * Clear scheduled update content image references.
  */
-function frmseo_clear_scheduled_update_content_image_references()
+function fmrseo_clear_scheduled_update_content_image_references()
 {
-    $timestamp = wp_next_scheduled('update_content_image_references_event');
+    $timestamp = wp_next_scheduled('fmrseo_update_content_image_references_event');
     if ($timestamp) {
-        wp_unschedule_event($timestamp, 'update_content_image_references_event');
+        wp_unschedule_event($timestamp, 'fmrseo_update_content_image_references_event');
     }
 }
 
@@ -534,12 +534,12 @@ function frmseo_clear_scheduled_update_content_image_references()
  * @param string $new_value The new value.
  * @return mixed The updated data.
  */
-function frmseo_update_serialized_data($data, $old_value, $new_value)
+function fmrseo_update_serialized_data($data, $old_value, $new_value)
 {
     if (is_serialized($data)) {
         $unserialized_data = unserialize($data);
 
-        $unserialized_data = frmseo_update_value_in_array($unserialized_data, $old_value, $new_value);
+        $unserialized_data = fmrseo_update_value_in_array($unserialized_data, $old_value, $new_value);
 
         $data = serialize($unserialized_data);
     } else {
@@ -557,11 +557,11 @@ function frmseo_update_serialized_data($data, $old_value, $new_value)
  * @param string $new_value The new media value.
  * @return array The updated array.
  */
-function frmseo_update_value_in_array($array, $old_value, $new_value)
+function fmrseo_update_value_in_array($array, $old_value, $new_value)
 {
     foreach ($array as $key => $value) {
         if (is_array($value)) {
-            $array[$key] = frmseo_update_value_in_array($value, $old_value, $new_value);
+            $array[$key] = fmrseo_update_value_in_array($value, $old_value, $new_value);
         } elseif (is_string($value)) {
             $array[$key] = str_replace($old_value, $new_value, $value);
         }

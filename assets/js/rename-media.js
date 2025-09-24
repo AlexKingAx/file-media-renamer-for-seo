@@ -10,7 +10,7 @@ jQuery(document).ready(function ($) {
     let post_id = $(this).attr("media-id");
 
     // Get the value of the input field to change the file name
-    var seo_name = $("#attachments-" + post_id + "-image_seo_name").val();
+    var seo_name = $("#attachments-" + post_id + "-fmrseo_image_seo_name").val();
 
     console.log("Post ID:", post_id);
     console.log("SEO Name:", seo_name);
@@ -22,7 +22,7 @@ jQuery(document).ready(function ($) {
     $.post(
       renameMedia.ajax_url,
       {
-        action: "save_seo_name",
+        action: "fmrseo_save_seo_name",
         post_id: post_id,
         seo_name: seo_name,
         _ajax_nonce: renameMedia.nonce,
@@ -63,8 +63,9 @@ jQuery(document).ready(function ($) {
     let post_id = $(this).attr("media-id");
 
     if(old_v){
-        $("#attachments-" + post_id + "-image_seo_name").val(old_v);
+        $("#attachments-" + post_id + "-fmrseo_image_seo_name").val(old_v);
 
     }
   });
 });
+
