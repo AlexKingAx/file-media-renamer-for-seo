@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Initializes the fmrseo_redirects option on plugin activation.
  *
-  * @return true|WP_Error
+ * @return true|WP_Error
  */
 function fmrseo_initialize_redirects_option()
 {
@@ -40,12 +40,10 @@ function fmrseo_add_redirect($old_url, $new_url)
 {
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'fmrseo_redirects';
-
     // Check if the redirect already exists
     $existing_redirect = $wpdb->get_var(
         $wpdb->prepare(
-            "SELECT COUNT(*) FROM $table_name WHERE old_url = %s",
+            "SELECT COUNT(*) FROM " . $wpdb->prefix . "fmrseo_redirects WHERE old_url = %s",
             $old_url
         )
     );
@@ -95,16 +93,15 @@ function fmrseo_check_image_redirect()
     }
 
     global $wpdb;
-
     // Build the current full URL being requested.
-    $request_uri = ltrim(esc_url_raw($_SERVER['REQUEST_URI']), '/');
+    if (isset($_SERVER['REQUEST_URI'])) $request_uri = ltrim(esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])), '/');
+
     $current_url = rtrim(home_url(), '/') . '/' . $request_uri;
 
-    // Check if there's a redirect for the requested URL
-    $table_name = $wpdb->prefix . 'fmrseo_redirects';
+    // Check if there's a redirect for the requested URL;
     $redirect = $wpdb->get_row(
         $wpdb->prepare(
-            "SELECT * FROM $table_name WHERE old_url = %s",
+            "SELECT * FROM ". $wpdb->prefix . "fmrseo_redirects WHERE old_url = %s",
             $current_url
         )
     );

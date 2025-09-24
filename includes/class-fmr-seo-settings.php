@@ -119,7 +119,7 @@ class File_Media_Renamer_SEO_Settings
             return;
         }
 
-        if (isset($_GET['settings-updated'])) {
+        if (isset($_GET['settings-updated']) && check_admin_referer('fmrseo-options')) {
             add_settings_error('fmrseo_messages', 'fmrseo_message', __('Settings Saved', 'fmrseo'), 'updated');
         }
 

@@ -599,15 +599,6 @@ function fmrseo_drop_redirects_table()
 {
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'fmrseo_redirects';
-    
-    $sql = $wpdb->prepare('DROP TABLE IF EXISTS %i', $table_name);
-
-    // security fallback for < 6.2 wordpress version
-    if (false === $sql) {
-        $sql = sprintf('DROP TABLE IF EXISTS `%s`', esc_sql($table_name));
-    }
-
-    $wpdb->query($sql);
+    $wpdb->query('DROP TABLE IF EXISTS' . $wpdb->prefix . 'fmrseo_redirects');
 }
 register_deactivation_hook(__FILE__, 'fmrseo_drop_redirects_table');
