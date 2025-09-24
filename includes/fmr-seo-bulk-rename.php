@@ -31,7 +31,15 @@ function fmrseo_handle_bulk_rename($redirect_to, $doaction, $post_ids)
     set_transient('fmrseo_bulk_rename_ids', $post_ids, 300); // 5 minutes
 
     // Redirect to custom page with modal
-    return add_query_arg('fmrseo_bulk_rename', '1', $redirect_to);
+    $modal_nonce = wp_create_nonce('fmrseo_bulk_rename_modal');
+
+    return add_query_arg(
+        array(
+            'fmrseo_bulk_rename' => '1',
+            'fmrseo_bulk_rename_nonce' => $modal_nonce,
+        ),
+        $redirect_to
+    );
 }
 add_filter('handle_bulk_actions-upload', 'fmrseo_handle_bulk_rename', 10, 3);
 
@@ -40,7 +48,21 @@ add_filter('handle_bulk_actions-upload', 'fmrseo_handle_bulk_rename', 10, 3);
  */
 function fmrseo_display_bulk_rename_modal()
 {
-    if (!isset($_GET['fmrseo_bulk_rename']) || $_GET['fmrseo_bulk_rename'] !== '1') {
+    $bulk_flag = '';
+    if (isset($_GET['fmrseo_bulk_rename'])) {
+        $bulk_flag = sanitize_text_field(wp_unslash($_GET['fmrseo_bulk_rename']));
+    }
+
+    if ('1' !== $bulk_flag) {
+        return;
+    }
+
+    $modal_nonce = '';
+    if (isset($_GET['fmrseo_bulk_rename_nonce'])) {
+        $modal_nonce = sanitize_text_field(wp_unslash($_GET['fmrseo_bulk_rename_nonce']));
+    }
+
+    if (empty($modal_nonce) || !wp_verify_nonce($modal_nonce, 'fmrseo_bulk_rename_modal')) {
         return;
     }
 
@@ -53,15 +75,16 @@ function fmrseo_display_bulk_rename_modal()
     <div id="fmrseo-bulk-rename-modal" style="display: none;">
         <div class="fmrseo-modal-content">
             <div class="fmrseo-modal-header">
-                <h2><?php _e('Rename Selected Media', 'fmrseo'); ?></h2>
+                <h2><?php esc_html_e('Rename Selected Media', 'fmrseo'); ?></h2>
                 <span class="fmrseo-close">&times;</span>
             </div>
             <div class="fmrseo-modal-body">
-                <p><?php printf(__('You have selected %d files to rename.', 'fmrseo'), count($post_ids)); ?></p>
+                <p><?php  // translators: selected post's number is displayed here  
+                printf(esc_html__('You have selected %d files to rename.', 'fmrseo'), count($post_ids)); ?></p>
                 <div class="fmrseo-form-group">
-                    <label for="fmrseo-bulk-name"><?php _e('Base name:', 'fmrseo'); ?></label>
-                    <input type="text" id="fmrseo-bulk-name" placeholder="<?php _e('e.g: new name', 'fmrseo'); ?>" />
-                    <p class="description"><?php _e('Files will be renamed as: new-name-1, new-name-2, etc.', 'fmrseo'); ?></p>
+                    <label for="fmrseo-bulk-name"><?php esc_html_e('Base name:', 'fmrseo'); ?></label>
+                    <input type="text" id="fmrseo-bulk-name" placeholder="<?php esc_html_e('e.g: new name', 'fmrseo'); ?>" />
+                    <p class="description"><?php esc_html_e('Files will be renamed as: new-name-1, new-name-2, etc.', 'fmrseo'); ?></p>
                 </div>
                 <div class="fmrseo-progress" style="display: none;">
                     <div class="fmrseo-progress-bar">
@@ -72,10 +95,10 @@ function fmrseo_display_bulk_rename_modal()
                 <div class="fmrseo-results" style="display: none;"></div>
             </div>
             <div class="fmrseo-modal-footer">
-                <button type="button" class="button button-secondary" id="fmrseo-cancel-bulk"><?php _e('Cancel', 'fmrseo'); ?></button>
-                <button type="button" class="button button-primary" id="fmrseo-start-bulk"><?php _e('Start Rename', 'fmrseo'); ?></button>
+                <button type="button" class="button button-secondary" id="fmrseo-cancel-bulk"><?php esc_html_e('Cancel', 'fmrseo'); ?></button>
+                <button type="button" class="button button-primary" id="fmrseo-start-bulk"><?php esc_html_e('Start Rename', 'fmrseo'); ?></button>
                 <button type="button" class="button button-primary" id="fmrseo-close-bulk" style="display: none;" disabled="true">
-    <?php _e('Close', 'fmrseo'); ?>
+    <?php esc_html_e('Close', 'fmrseo'); ?>
 </button>
 
             </div>
@@ -177,7 +200,7 @@ function fmrseo_ajax_bulk_rename()
 {
     try {
         // Verify nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'fmrseo_bulk_rename_nonce')) {
+        if (!check_ajax_referer('fmrseo_bulk_rename_nonce', 'nonce', false)) {
             throw new Exception(__('Security verification failed.', 'fmrseo'));
         }
 
@@ -186,8 +209,12 @@ function fmrseo_ajax_bulk_rename()
             throw new Exception(__('Insufficient permissions.', 'fmrseo'));
         }
 
-        $post_ids = isset($_POST['post_ids']) ? array_map('intval', $_POST['post_ids']) : array();
-        $base_name = isset($_POST['base_name']) ? sanitize_file_name($_POST['base_name']) : '';
+        $post_ids = array();
+        if (isset($_POST['post_ids']) && is_array($_POST['post_ids'])) {
+            $post_ids = array_map('intval', wp_unslash($_POST['post_ids']));
+        }
+
+        $base_name = isset($_POST['base_name']) ? sanitize_file_name(wp_unslash($_POST['base_name'])) : '';
 
         if (empty($post_ids) || empty($base_name)) {
             throw new Exception(__('Missing parameters.', 'fmrseo'));
