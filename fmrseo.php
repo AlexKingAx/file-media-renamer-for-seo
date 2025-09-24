@@ -11,7 +11,6 @@
  * Developer URI: https://alex-web.it/
  * Text Domain: fmrseo
  * Domain Path: /languages
- * 
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -23,6 +22,53 @@ require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-bulk-rename.php';
 
 if (! defined('ABSPATH')) {
     exit;
+}
+
+/**
+ * Ensure the WordPress filesystem API is available.
+ *
+ * @return WP_Filesystem_Base|WP_Error
+ */
+function frmseo_get_filesystem()
+{
+    global $wp_filesystem;
+
+    if (!function_exists('WP_Filesystem')) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+
+    if (!is_object($wp_filesystem)) {
+        WP_Filesystem();
+    }
+
+    if (is_object($wp_filesystem)) {
+        return $wp_filesystem;
+    }
+
+    return new WP_Error('fmrseo_filesystem_unavailable', esc_html__('Unable to initialize the WordPress filesystem API.', 'fmrseo'));
+}
+
+/**
+ * Move a file using the WordPress filesystem API.
+ *
+ * @param string $source Source path.
+ * @param string $destination Destination path.
+ * @param bool $overwrite Whether to overwrite the destination if it exists.
+ * @return true|WP_Error
+ */
+function frmseo_move_file($source, $destination, $overwrite = false)
+{
+    $filesystem = frmseo_get_filesystem();
+
+    if (is_wp_error($filesystem)) {
+        return $filesystem;
+    }
+
+    if (!$filesystem->move($source, $destination, $overwrite)) {
+        return new WP_Error('fmrseo_move_failed', esc_html__('Failed to move the file via WP_Filesystem.', 'fmrseo'));
+    }
+
+    return true;
 }
 
 // Upload the text domain
@@ -196,8 +242,9 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
 
     // Rename file if needed
     if ($file_path !== $new_file_path) {
-        if (!rename($file_path, $new_file_path)) {
-            return new WP_Error('fmrseo_rename_failed', __('Failed to rename the file.', 'fmrseo'));
+        $move_result = frmseo_move_file($file_path, $new_file_path);
+        if (is_wp_error($move_result)) {
+            return $move_result;
         }
     }
 
@@ -220,7 +267,10 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
             $new_thumbnail_path = trailingslashit($file_dir) . $thumbnail_name;
 
             if (file_exists($old_thumbnail_path) && $old_thumbnail_path !== $new_thumbnail_path) {
-                rename($old_thumbnail_path, $new_thumbnail_path);
+                $thumbnail_move = frmseo_move_file($old_thumbnail_path, $new_thumbnail_path);
+                if (is_wp_error($thumbnail_move)) {
+                    continue;
+                }
 
                 $old_thumbnail_url = str_replace($wp_upload_dir['basedir'], $wp_upload_dir['baseurl'], $old_thumbnail_path);
                 $new_thumbnail_url = str_replace($wp_upload_dir['basedir'], $wp_upload_dir['baseurl'], $new_thumbnail_path);
@@ -315,13 +365,15 @@ function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false
 function frmseo_save_seo_name_ajax()
 {
     try {
-        if (!isset($_POST['_ajax_nonce']) || !wp_verify_nonce($_POST['_ajax_nonce'], 'save_seo_name_nonce')) {
-            throw new Exception(__('Nonce verification failed.', 'fmrseo'));
+        if (!check_ajax_referer('save_seo_name_nonce', '_ajax_nonce', false)) {
+            throw new Exception(esc_html__('Nonce verification failed.', 'fmrseo'));
         }
 
-        $post_id = intval($_POST['post_id']);
-        $seo_name = sanitize_text_field($_POST['seo_name']);
-        $seo_name = sanitize_file_name($seo_name);
+        $post_id = isset($_POST['post_id']) ? intval(wp_unslash($_POST['post_id'])) : 0;
+        $seo_name = '';
+        if (isset($_POST['seo_name'])) {
+            $seo_name = sanitize_file_name(wp_unslash($_POST['seo_name']));
+        }
 
         if (!$post_id || !$seo_name) {
             throw new Exception(__('File path not found.', 'fmrseo'));
@@ -406,10 +458,14 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
     $old_url_escaped = '%' . $wpdb->esc_like($old_url) . '%';
 
     // Search for the old URL in post_content of wp_posts
-    $sql = "SELECT ID, post_content FROM {$wpdb->posts} WHERE
-                post_content LIKE '{$old_url_escaped}'";
-
-    $posts = $wpdb->get_results($sql);
+    $posts = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT ID, post_content 
+         FROM {$wpdb->posts} 
+         WHERE post_content LIKE %s",
+            $old_url_escaped
+        )
+    );
 
     foreach ($posts as $post) {
         $updated_content = frmseo_update_serialized_data($post->post_content, $old_url, $new_url);
@@ -426,9 +482,8 @@ function frmseo_update_content_image_references_background($old_url, $new_url, $
         wp_cache_delete($post->ID, 'posts');
     }
 
-    $query_meta = "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value LIKE '{$old_url_escaped}'";
-
-    $postmeta = $wpdb->get_results($query_meta);
+    // Search for the old URL in meta_value of wp_postsmeta
+    $postmeta = $wpdb->get_results($wpdb->prepare("SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value LIKE %s", $old_url_escaped));
 
     foreach ($postmeta as $meta) {
         $updated_meta_value = frmseo_update_serialized_data($meta->meta_value, $old_url, $new_url);
@@ -545,6 +600,14 @@ function fmrseo_drop_redirects_table()
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'fmrseo_redirects';
-    $wpdb->query("DROP TABLE IF EXISTS $table_name");
+    
+    $sql = $wpdb->prepare('DROP TABLE IF EXISTS %i', $table_name);
+
+    // security fallback for < 6.2 wordpress version
+    if (false === $sql) {
+        $sql = sprintf('DROP TABLE IF EXISTS `%s`', esc_sql($table_name));
+    }
+
+    $wpdb->query($sql);
 }
 register_deactivation_hook(__FILE__, 'fmrseo_drop_redirects_table');
