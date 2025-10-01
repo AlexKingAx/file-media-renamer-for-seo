@@ -23,8 +23,8 @@ class File_Media_Renamer_SEO_Settings
     {
         add_submenu_page(
             'upload.php', // Parent slug
-            __('File Media Renamer Settings', 'file-media-renamer-for-seo'), // Page title
-            __('FMR Settings', 'file-media-renamer-for-seo'), // Menu title
+            esc_html__('File Media Renamer Settings', 'file-media-renamer-for-seo'), // Page title
+            esc_html__('FMR Settings', 'file-media-renamer-for-seo'), // Menu title
             'manage_options', // Capability
             'fmrseo', // Menu slug
             array($this, 'fmrseo_settings_page_content') // Callback function
@@ -54,26 +54,26 @@ class File_Media_Renamer_SEO_Settings
         // Checkbox: Rename Title
         add_settings_field(
             'rename_title', // ID
-            __('Rename Title', 'file-media-renamer-for-seo'), // Title
+            esc_html__('Rename Title', 'file-media-renamer-for-seo'), // Title
             array($this, 'fmrseo_checkbox_callback'), // Callback
             'fmrseo', // Page
             'fmrseo_section_developers', // Section
             array(
                 'label_for' => 'rename_title',
-                'description' => __('If enabled, the media title will also be renamed.', 'file-media-renamer-for-seo'),
+                'description' => esc_html__('If enabled, the media title will also be renamed.', 'file-media-renamer-for-seo'),
             )
         );
 
         // Checkbox: Rename Alt Text
         add_settings_field(
             'rename_alt_text', // ID
-            __('Rename Alt Text', 'file-media-renamer-for-seo'), // Title
+            esc_html__('Rename Alt Text', 'file-media-renamer-for-seo'), // Title
             array($this, 'fmrseo_checkbox_callback'), // Callback
             'fmrseo', // Page
             'fmrseo_section_developers', // Section
             array(
                 'label_for' => 'rename_alt_text',
-                'description' => __('If enabled, the media alt text will also be renamed.', 'file-media-renamer-for-seo'),
+                'description' => esc_html__('If enabled, the media alt text will also be renamed.', 'file-media-renamer-for-seo'),
             )
         );
     }
@@ -123,7 +123,7 @@ class File_Media_Renamer_SEO_Settings
         // check parameter without controlling nonce
         // because is already done by wordpress using settings_fields()
         if (isset($_GET['settings-updated'])) {
-            add_settings_error('fmrseo_messages', 'fmrseo_message', __('Settings Saved', 'file-media-renamer-for-seo'), 'updated');
+            add_settings_error('fmrseo_messages', 'fmrseo_message', esc_html__('Settings Saved', 'file-media-renamer-for-seo'), 'updated');
         }
 
         settings_errors('fmrseo_messages');
@@ -134,7 +134,7 @@ class File_Media_Renamer_SEO_Settings
                 <?php
                 settings_fields('fmrseo');
                 do_settings_sections('fmrseo');
-                submit_button(__('Save', 'file-media-renamer-for-seo'));
+                submit_button(esc_html__('Save', 'file-media-renamer-for-seo'));
                 ?>
             </form>
         </div>

@@ -3,10 +3,10 @@
  * Plugin Name: File Media Renamer for SEO
  * Plugin URI: https://filemediarenamerwp.com/
  * Description: A lightweight, fast plugin that improves SEO and streamlines your media workflow.
- * Version: 1.0.1
- * Author: Alex-Web
+ * Version: 1.0.2
+ * Author: alexwebitaly
  * Author URI: https://alex-web.it/
- * Developer: Alex-Web
+ * Developer: alexwebitaly
  * Developer URI: https://alex-web.it/
  * Text Domain: file-media-renamer-for-seo
  * Domain Path: /languages
@@ -94,7 +94,7 @@ add_action('init', 'fmrseo_init_settings');
 function fmrseo_setting_link($links)
 {
     // Add a settings link to the plugin action links
-    $settings_link = '<a href="upload.php?page=fmrseo">' . __('Settings', 'file-media-renamer-for-seo') . '</a>';
+    $settings_link = '<a href="upload.php?page=fmrseo">' . esc_html__('Settings', 'file-media-renamer-for-seo') . '</a>';
     // Add the settings link to the beginning of the links array
     array_unshift($links, $settings_link);
 
@@ -155,15 +155,15 @@ function fmrseo_add_seo_name_field_to_attachment($form_fields, $post)
     }
 
     $form_fields['fmrseo_image_seo_name'] = array(
-        'label' => __('SEO Name', 'file-media-renamer-for-seo'),
+        'label' => esc_html__('SEO Name', 'file-media-renamer-for-seo'),
         'input' => 'text',
         'value' => esc_attr($fmrseo_image_seo_name),
-        'helps' => __('Change image file name and path for better SEO', 'file-media-renamer-for-seo')
+        'helps' => esc_html__('Change image file name and path for better SEO', 'file-media-renamer-for-seo')
     );
 
     $form_fields['save_button'] = array(
         'input' => 'html',
-        'html' => '<button id="save-seo-name" class="button" media-id="' . esc_attr($post->ID) . '">' . __('Save SEO Name', 'file-media-renamer-for-seo') . '</button>',
+        'html' => '<button id="save-seo-name" class="button" media-id="' . esc_attr($post->ID) . '">' . esc_html__('Save SEO Name', 'file-media-renamer-for-seo') . '</button>',
         'label' => ''
     );
 
@@ -181,7 +181,7 @@ function fmrseo_add_seo_name_field_to_attachment($form_fields, $post)
 
         // Add the history to the form fields
         $form_fields['fmrseo_rename_history'] = array(
-            'label' => __('SEO name history', 'file-media-renamer-for-seo'),
+            'label' => esc_html__('SEO name history', 'file-media-renamer-for-seo'),
             'input' => 'html',
             'html'  => $ul,
         );
@@ -217,7 +217,7 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
     $file_path = get_attached_file($post_id);
 
     if (!$file_path) {
-        return new WP_Error('fmrseo_file_path_not_found', __('File path not found.', 'file-media-renamer-for-seo'));
+        return new WP_Error('fmrseo_file_path_not_found', esc_html__('File path not found.', 'file-media-renamer-for-seo'));
     }
 
     $file_dir = pathinfo($file_path, PATHINFO_DIRNAME);
@@ -225,14 +225,14 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
     $new_file_path = trailingslashit($file_dir) . $seo_name . '.' . $file_ext;
 
     if (!file_exists($file_path)) {
-        return new WP_Error('fmrseo_original_file_missing', __('Original file does not exist.', 'file-media-renamer-for-seo'));
+        return new WP_Error('fmrseo_original_file_missing', esc_html__('Original file does not exist.', 'file-media-renamer-for-seo'));
     }
 
     $unique = null;
     // Check if the new file path is the same as the current file path
     if (file_exists($new_file_path) && $file_path !== $new_file_path) {
         // If the new file already exists and if not restoring, return an exception
-        if (!$is_restore) return new WP_Error('fmrseo_file_exists', __('A file with the new name and the same file extension already exists. Change it or add a number!', 'file-media-renamer-for-seo'));
+        if (!$is_restore) return new WP_Error('fmrseo_file_exists', esc_html__('A file with the new name and the same file extension already exists. Change it or add a number!', 'file-media-renamer-for-seo'));
         else {
             $unique = wp_unique_filename($file_dir, $seo_name . '.' . $file_ext);
             $new_file_path = trailingslashit($file_dir) . $unique;
@@ -378,7 +378,7 @@ function fmrseo_save_seo_name_ajax()
         }
 
         if (!$post_id || !$seo_name) {
-            throw new Exception(__('File path not found.', 'file-media-renamer-for-seo'));
+            throw new Exception(esc_html__('File path not found.', 'file-media-renamer-for-seo'));
         }
 
         // Use the wrapper function
@@ -388,7 +388,7 @@ function fmrseo_save_seo_name_ajax()
         $final_seo_name = isset($result['seo_name']) ? $result['seo_name'] : pathinfo($result['new_file_path'], PATHINFO_FILENAME);
 
         wp_send_json_success([
-            'message'  => __('File and thumbnails renamed successfully.', 'file-media-renamer-for-seo'),
+            'message'  => esc_html__('File and thumbnails renamed successfully.', 'file-media-renamer-for-seo'),
             'url'      => $result['new_file_url'],
             'filename' => $final_seo_name . '.' . $result['file_ext']
         ]);

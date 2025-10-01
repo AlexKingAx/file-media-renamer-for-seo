@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
  */
 function fmrseo_add_bulk_rename_action($bulk_actions)
 {
-    $bulk_actions['fmrseo_bulk_rename'] = __('Rename', 'file-media-renamer-for-seo');
+    $bulk_actions['fmrseo_bulk_rename'] = esc_html__('Rename', 'file-media-renamer-for-seo');
     return $bulk_actions;
 }
 add_filter('bulk_actions-upload', 'fmrseo_add_bulk_rename_action');
@@ -105,7 +105,7 @@ function fmrseo_display_bulk_rename_modal()
     </div>
 
     <script type="text/javascript">
-        var fmrseoBulkRenameIds = <?php echo json_encode($post_ids); ?>;
+        var fmrseoBulkRenameIds = <?php echo wp_json_encode($post_ids); ?>;
     </script>
 <?php
 
@@ -135,11 +135,11 @@ function fmrseo_enqueue_bulk_rename_assets($hook)
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('fmrseo_bulk_rename_nonce'),
         'strings' => array(
-            'processing' => __('Processing...', 'file-media-renamer-for-seo'),
-            'completed' => __('Rename completed!', 'file-media-renamer-for-seo'),
-            'error' => __('Error during rename', 'file-media-renamer-for-seo'),
-            'success' => __('File renamed successfully', 'file-media-renamer-for-seo'),
-            'failed' => __('Error renaming file', 'file-media-renamer-for-seo')
+            'processing' => esc_html__('Processing...', 'file-media-renamer-for-seo'),
+            'completed' => esc_html__('Rename completed!', 'file-media-renamer-for-seo'),
+            'error' => esc_html__('Error during rename', 'file-media-renamer-for-seo'),
+            'success' => esc_html__('File renamed successfully', 'file-media-renamer-for-seo'),
+            'failed' => esc_html__('Error renaming file', 'file-media-renamer-for-seo')
         )
     ));
 
@@ -176,7 +176,7 @@ function fmrseo_bulk_rename_media_files($post_ids, $base_name)
                 'post_id' => $post_id,
                 'old_name' => basename($result['old_file_path']),
                 'new_name' => $final_seo_name . '.' . $result['file_ext'],
-                'message' => __('File renamed successfully', 'file-media-renamer-for-seo')
+                'message' => esc_html__('File renamed successfully', 'file-media-renamer-for-seo')
             );
 
             $counter++;
@@ -200,12 +200,12 @@ function fmrseo_ajax_bulk_rename()
     try {
         // Verify nonce
         if (!check_ajax_referer('fmrseo_bulk_rename_nonce', 'nonce', false)) {
-            throw new Exception(__('Security verification failed.', 'file-media-renamer-for-seo'));
+            throw new Exception(esc_html__('Security verification failed.', 'file-media-renamer-for-seo'));
         }
 
         // Check permissions
         if (!current_user_can('upload_files')) {
-            throw new Exception(__('Insufficient permissions.', 'file-media-renamer-for-seo'));
+            throw new Exception(esc_html__('Insufficient permissions.', 'file-media-renamer-for-seo'));
         }
 
         $post_ids = array();
@@ -216,23 +216,23 @@ function fmrseo_ajax_bulk_rename()
         $base_name = isset($_POST['base_name']) ? sanitize_file_name(wp_unslash($_POST['base_name'])) : '';
 
         if (empty($post_ids) || empty($base_name)) {
-            throw new Exception(__('Missing parameters.', 'file-media-renamer-for-seo'));
+            throw new Exception(esc_html__('Missing parameters.', 'file-media-renamer-for-seo'));
         }
 
         // Validate base name
         if (!preg_match('/^[a-zA-Z0-9\-_]+$/', $base_name)) {
-            throw new Exception(__('Base name can only contain letters, numbers, hyphens and underscores.', 'file-media-renamer-for-seo'));
+            throw new Exception(esc_html__('Base name can only contain letters, numbers, hyphens and underscores.', 'file-media-renamer-for-seo'));
         }
 
         // Limit number of files to prevent timeout
         if (count($post_ids) > 50) {
-            throw new Exception(__('You can rename maximum 50 files at once.', 'file-media-renamer-for-seo'));
+            throw new Exception(esc_html__('You can rename maximum 50 files at once.', 'file-media-renamer-for-seo'));
         }
 
         // Verify all IDs are valid attachments
         foreach ($post_ids as $post_id) {
             if (get_post_type($post_id) !== 'attachment') {
-                throw new Exception(__('One or more IDs are not valid media files.', 'file-media-renamer-for-seo'));
+                throw new Exception(esc_html__('One or more IDs are not valid media files.', 'file-media-renamer-for-seo'));
             }
         }
 

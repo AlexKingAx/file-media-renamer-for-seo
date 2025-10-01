@@ -1,10 +1,10 @@
 === File Media Renamer for SEO ===
-Contributors: alex-web
+Contributors: alexwebitaly
 Donate link: https://filemediarenamerwp.com/
 Tags: rename media files, image titles, alt text, bulk rename images, image seo
 Requires at least: 4.0
 Tested up to: 6.8
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
