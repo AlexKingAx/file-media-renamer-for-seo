@@ -20,6 +20,7 @@ if (! defined('ABSPATH')) {
 
 // Include the settings file
 require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-fmr-seo-ai-provider.php';
 require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-redirects.php';
 require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-bulk-rename.php';
 
@@ -89,6 +90,199 @@ function fmrseo_init_settings()
 add_action('init', 'fmrseo_init_settings');
 
 /**
+ * Returns plugin options merged with defaults.
+ *
+ * @return array
+ */
+function fmrseo_get_options()
+{
+    $options = get_option('fmrseo_options', array());
+    if (!is_array($options)) {
+        $options = array();
+    }
+
+    return wp_parse_args($options, File_Media_Renamer_SEO_Settings::fmrseo_get_default_options());
+}
+
+/**
+ * Returns normalized AI settings.
+ *
+ * @return array
+ */
+function fmrseo_get_ai_settings()
+{
+    $options = fmrseo_get_options();
+    $delay = isset($options['ai_delay']) ? (float) $options['ai_delay'] : 2;
+    $max_files = isset($options['ai_max_files']) ? absint($options['ai_max_files']) : 500;
+
+    if ($delay < 0) {
+        $delay = 0;
+    }
+    if ($delay > 60) {
+        $delay = 60;
+    }
+
+    return array(
+        'enabled' => !empty($options['ai_enable']),
+        'provider' => isset($options['ai_provider']) ? sanitize_key($options['ai_provider']) : 'openai',
+        'api_key' => isset($options['ai_api_key']) ? trim((string) $options['ai_api_key']) : '',
+        'model' => isset($options['ai_model']) ? trim((string) $options['ai_model']) : 'gpt-4.1-mini',
+        'website_info' => isset($options['ai_website_info']) ? (string) $options['ai_website_info'] : '',
+        'brand' => isset($options['ai_brand']) ? (string) $options['ai_brand'] : '',
+        'delay' => $delay,
+        'max_files' => $max_files,
+    );
+}
+
+/**
+ * Checks whether AI rename can run.
+ *
+ * @param array|null $ai_settings Optional AI settings.
+ * @return bool
+ */
+function fmrseo_ai_is_ready($ai_settings = null)
+{
+    if (!is_array($ai_settings)) {
+        $ai_settings = fmrseo_get_ai_settings();
+    }
+
+    return !empty($ai_settings['enabled']) && !empty($ai_settings['api_key']);
+}
+
+/**
+ * Normalizes AI output into SEO filename format.
+ *
+ * @param string $raw_name Raw AI output.
+ * @return string
+ */
+function fmrseo_sanitize_ai_filename($raw_name)
+{
+    $raw_name = wp_strip_all_tags((string) $raw_name);
+    $raw_name = html_entity_decode($raw_name, ENT_QUOTES, 'UTF-8');
+    $raw_name = str_replace(array('"', "'", '`'), '', $raw_name);
+    $raw_name = preg_replace('/\.[a-z0-9]{2,5}$/i', '', $raw_name);
+    $raw_name = remove_accents($raw_name);
+    $raw_name = strtolower($raw_name);
+    $raw_name = preg_replace('/[^a-z0-9\s\-_]+/', ' ', $raw_name);
+    $raw_name = preg_replace('/[\s_]+/', '-', $raw_name);
+    $raw_name = preg_replace('/-+/', '-', $raw_name);
+    $raw_name = trim($raw_name, '-');
+    $raw_name = sanitize_title($raw_name);
+
+    return trim($raw_name, '-');
+}
+
+/**
+ * Ensures filename uniqueness by adding "-2", "-3", etc.
+ *
+ * @param int    $post_id   Attachment ID.
+ * @param string $base_name Base filename without extension.
+ *
+ * @return string|WP_Error
+ */
+function fmrseo_get_unique_seo_name($post_id, $base_name)
+{
+    $file_path = get_attached_file($post_id);
+    if (empty($file_path)) {
+        return new WP_Error('fmrseo_ai_file_path_not_found', esc_html__('File path not found.', 'file-media-renamer-for-seo'));
+    }
+
+    $base_name = sanitize_title($base_name);
+    if (empty($base_name)) {
+        return new WP_Error('fmrseo_ai_empty_filename', esc_html__('AI generated an empty filename.', 'file-media-renamer-for-seo'));
+    }
+
+    $file_dir = pathinfo($file_path, PATHINFO_DIRNAME);
+    $file_ext = pathinfo($file_path, PATHINFO_EXTENSION);
+    $current_file_name = pathinfo($file_path, PATHINFO_FILENAME);
+
+    $candidate = $base_name;
+    $counter = 2;
+
+    while (file_exists(trailingslashit($file_dir) . $candidate . '.' . $file_ext) && $candidate !== $current_file_name) {
+        $candidate = $base_name . '-' . $counter;
+        $counter++;
+    }
+
+    return $candidate;
+}
+
+/**
+ * Generates an AI filename for an attachment.
+ *
+ * @param int $post_id Attachment ID.
+ * @return string|WP_Error
+ */
+function fmrseo_generate_ai_seo_name($post_id)
+{
+    $ai_settings = fmrseo_get_ai_settings();
+
+    if (empty($ai_settings['enabled'])) {
+        return new WP_Error('fmrseo_ai_disabled', esc_html__('AI rename is disabled in plugin settings.', 'file-media-renamer-for-seo'));
+    }
+
+    if (empty($ai_settings['api_key'])) {
+        return new WP_Error('fmrseo_ai_missing_key', esc_html__('OpenAI API key is not configured.', 'file-media-renamer-for-seo'));
+    }
+
+    $provider = fmrseo_get_ai_provider_instance($ai_settings['provider']);
+    if (is_wp_error($provider)) {
+        return $provider;
+    }
+
+    $generated_name = $provider->generate_name_for_attachment(
+        $post_id,
+        array(
+            'api_key' => $ai_settings['api_key'],
+            'model' => $ai_settings['model'],
+            'website_info' => $ai_settings['website_info'],
+            'brand' => $ai_settings['brand'],
+        )
+    );
+
+    if (is_wp_error($generated_name)) {
+        return $generated_name;
+    }
+
+    $sanitized_name = fmrseo_sanitize_ai_filename($generated_name);
+    if (empty($sanitized_name)) {
+        return new WP_Error('fmrseo_ai_empty_filename', esc_html__('AI generated an empty filename.', 'file-media-renamer-for-seo'));
+    }
+
+    return fmrseo_get_unique_seo_name($post_id, $sanitized_name);
+}
+
+/**
+ * Executes full AI rename flow for one attachment.
+ *
+ * @param int $post_id Attachment ID.
+ * @return array|WP_Error
+ */
+function fmrseo_ai_rename_attachment($post_id)
+{
+    $post_id = (int) $post_id;
+    if ($post_id <= 0 || get_post_type($post_id) !== 'attachment') {
+        return new WP_Error('fmrseo_ai_invalid_attachment', esc_html__('Invalid attachment.', 'file-media-renamer-for-seo'));
+    }
+
+    $seo_name = fmrseo_generate_ai_seo_name($post_id);
+    if (is_wp_error($seo_name)) {
+        return $seo_name;
+    }
+
+    $result = fmrseo_complete_rename_process($post_id, $seo_name);
+    if (is_wp_error($result)) {
+        return $result;
+    }
+
+    if (!isset($result['seo_name'])) {
+        $result['seo_name'] = $seo_name;
+    }
+
+    return $result;
+}
+
+/**
  * Add a settings link to the plugin action links.
  */
 function fmrseo_setting_link($links)
@@ -116,6 +310,7 @@ function fmrseo_activation_hooks()
 
     // Register the AJAX action to save the SEO name
     add_action('wp_ajax_fmrseo_save_seo_name', 'fmrseo_save_seo_name_ajax');
+    add_action('wp_ajax_fmrseo_ai_rename', 'fmrseo_ai_rename_ajax');
 
     // Hook to execute the update function when the event is scheduled
     add_action('fmrseo_update_content_image_references_event', 'fmrseo_update_content_image_references_background', 10, 4);
@@ -167,6 +362,35 @@ function fmrseo_add_seo_name_field_to_attachment($form_fields, $post)
         'label' => ''
     );
 
+    $ai_settings = fmrseo_get_ai_settings();
+    $ai_disabled_reason = '';
+
+    if (empty($ai_settings['enabled'])) {
+        $ai_disabled_reason = esc_html__('AI rename is disabled in plugin settings.', 'file-media-renamer-for-seo');
+    } elseif (empty($ai_settings['api_key'])) {
+        $ai_disabled_reason = esc_html__('Set your OpenAI API key in AI Rename settings to enable this feature.', 'file-media-renamer-for-seo');
+    }
+
+    $ai_button_html = '<button type="button" class="button fmrseo-ai-rename-button" data-media-id="' . esc_attr($post->ID) . '" title="' . esc_attr__('Automatically rename this file with AI', 'file-media-renamer-for-seo') . '"';
+    if (!empty($ai_disabled_reason)) {
+        $ai_button_html .= ' disabled="disabled"';
+    }
+    $ai_button_html .= '><span class="dashicons dashicons-superhero" aria-hidden="true"></span><span class="fmrseo-ai-button-text">' . esc_html__('AI Rename', 'file-media-renamer-for-seo') . '</span></button>';
+
+    $form_fields['fmrseo_ai_rename_button'] = array(
+        'input' => 'html',
+        'html' => $ai_button_html,
+        'label' => ''
+    );
+
+    if (!empty($ai_disabled_reason)) {
+        $form_fields['fmrseo_ai_rename_notice'] = array(
+            'label' => '',
+            'input' => 'html',
+            'html' => '<p class="description">' . esc_html($ai_disabled_reason) . '</p>',
+        );
+    }
+
     // Add Undo button if there is history
     $history = get_post_meta($post->ID, '_fmrseo_rename_history', true);
     if (is_array($history) && count($history) > 0) {
@@ -195,12 +419,56 @@ function fmrseo_add_seo_name_field_to_attachment($form_fields, $post)
  */
 function fmrseo_enqueue_custom_admin_script()
 {
+    $ai_settings = fmrseo_get_ai_settings();
+
     wp_enqueue_script('jquery');
     wp_enqueue_script('rename-media', plugin_dir_url(__FILE__) . 'assets/js/rename-media.js', array('jquery'), FMRSEO_VERSION, true);
     wp_localize_script('rename-media', 'renameMedia', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('fmrseo_save_seo_name_nonce') // pass nonce
+        'nonce' => wp_create_nonce('fmrseo_save_seo_name_nonce'),
+        'ai_nonce' => wp_create_nonce('fmrseo_ai_rename_nonce'),
+        'ai_enabled' => !empty($ai_settings['enabled']),
+        'ai_key_set' => !empty($ai_settings['api_key']),
+        'strings' => array(
+            'insufficient_permissions' => esc_html__('Insufficient permissions.', 'file-media-renamer-for-seo'),
+            'ai_processing' => esc_html__('Generating filename with AI...', 'file-media-renamer-for-seo'),
+            'ai_success' => esc_html__('AI rename completed successfully.', 'file-media-renamer-for-seo'),
+            'ai_error' => esc_html__('AI rename failed.', 'file-media-renamer-for-seo'),
+            'ai_missing_key' => esc_html__('Set your OpenAI API key in AI Rename settings to use this feature.', 'file-media-renamer-for-seo'),
+            'ai_disabled' => esc_html__('Enable AI Rename in plugin settings to use this feature.', 'file-media-renamer-for-seo'),
+        ),
     ));
+
+    wp_register_style('fmrseo-ai-admin-style', false, array(), FMRSEO_VERSION);
+    wp_enqueue_style('fmrseo-ai-admin-style');
+    wp_add_inline_style('fmrseo-ai-admin-style', '
+        .fmrseo-ai-rename-button {
+            background-image: linear-gradient(to right, #61DAFB , #1fc0f1 , #03a3d7) !important;
+            color: black !important;
+            display: inline-flex !important;
+            align-items: center;
+            border: none!important;
+            gap: 6px;
+            min-width: 117.256px!important;
+            text-align: center;
+        }
+        .fmrseo-ai-rename-button:hover,
+        .fmrseo-ai-rename-button:focus {
+            background-image: linear-gradient(to left, #61DAFB , #1fc0f1 , #03a3d7) !important;
+            color: #ffffff !important;
+        }
+        .fmrseo-ai-rename-button[disabled],
+        .fmrseo-ai-rename-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .fmrseo-ai-rename-button .dashicons {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+        }
+    ');
 }
 
 /**
@@ -335,6 +603,9 @@ function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false
 
     // Use the rename function
     $result = fmrseo_rename_media_file($post_id, $seo_name, $restore);
+    if (is_wp_error($result)) {
+        return $result;
+    }
 
     // Update the post name to match the new SEO name if unique role is used
     if (isset($result['seo_name'])) {
@@ -371,6 +642,10 @@ function fmrseo_save_seo_name_ajax()
             throw new Exception(esc_html__('Nonce verification failed.', 'file-media-renamer-for-seo'));
         }
 
+        if (!current_user_can('upload_files')) {
+            throw new Exception(esc_html__('Insufficient permissions.', 'file-media-renamer-for-seo'));
+        }
+
         $post_id = isset($_POST['post_id']) ? intval(wp_unslash($_POST['post_id'])) : 0;
         $seo_name = '';
         if (isset($_POST['seo_name'])) {
@@ -383,6 +658,9 @@ function fmrseo_save_seo_name_ajax()
 
         // Use the wrapper function
         $result = fmrseo_complete_rename_process($post_id, $seo_name);
+        if (is_wp_error($result)) {
+            throw new Exception($result->get_error_message());
+        }
 
         // Get final seo_name in case it was modified
         $final_seo_name = isset($result['seo_name']) ? $result['seo_name'] : pathinfo($result['new_file_path'], PATHINFO_FILENAME);
@@ -394,6 +672,43 @@ function fmrseo_save_seo_name_ajax()
         ]);
     } catch (Exception $e) {
         wp_send_json_error(['message' => $e->getMessage()]);
+    }
+}
+
+/**
+ * AJAX handler for single attachment AI rename.
+ */
+function fmrseo_ai_rename_ajax()
+{
+    try {
+        if (!check_ajax_referer('fmrseo_ai_rename_nonce', 'nonce', false)) {
+            throw new Exception(esc_html__('Security verification failed.', 'file-media-renamer-for-seo'));
+        }
+
+        if (!current_user_can('upload_files')) {
+            throw new Exception(esc_html__('Insufficient permissions.', 'file-media-renamer-for-seo'));
+        }
+
+        $post_id = isset($_POST['post_id']) ? intval(wp_unslash($_POST['post_id'])) : 0;
+        if ($post_id <= 0) {
+            throw new Exception(esc_html__('Missing parameters.', 'file-media-renamer-for-seo'));
+        }
+
+        $result = fmrseo_ai_rename_attachment($post_id);
+        if (is_wp_error($result)) {
+            throw new Exception($result->get_error_message());
+        }
+
+        $final_seo_name = isset($result['seo_name']) ? $result['seo_name'] : pathinfo($result['new_file_path'], PATHINFO_FILENAME);
+
+        wp_send_json_success(array(
+            'message' => esc_html__('AI rename completed successfully.', 'file-media-renamer-for-seo'),
+            'url' => $result['new_file_url'],
+            'filename' => $final_seo_name . '.' . $result['file_ext'],
+            'seo_name' => $final_seo_name,
+        ));
+    } catch (Exception $e) {
+        wp_send_json_error(array('message' => $e->getMessage()));
     }
 }
 

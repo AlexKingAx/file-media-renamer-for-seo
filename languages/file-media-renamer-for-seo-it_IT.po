@@ -175,3 +175,184 @@ msgid "Simple and speedy plug-in for help your SEO"
 msgstr ""
 "\n"
 "Plug-in semplice e veloce per aiutare il tuo SEO"
+
+msgid "General"
+msgstr "Generale"
+
+msgid "AI Rename"
+msgstr "Rinomina AI"
+
+msgid "Enable AI rename"
+msgstr "Abilita rinomina AI"
+
+msgid "Enable automatic AI filename generation."
+msgstr "Abilita la generazione automatica dei nomi file tramite AI."
+
+msgid "AI Provider"
+msgstr "Provider AI"
+
+msgid "OpenAI"
+msgstr "OpenAI"
+
+msgid "Select the AI provider to use for renaming."
+msgstr "Seleziona il provider AI da usare per la rinomina."
+
+msgid "API Key"
+msgstr "Chiave API"
+
+msgid "Enter your OpenAI API key. Leave empty to keep the current key."
+msgstr "Inserisci la tua chiave API OpenAI. Lascia vuoto per mantenere la chiave corrente."
+
+msgid "Model"
+msgstr "Modello"
+
+msgid "OpenAI model name used for image-based filename generation."
+msgstr "Nome del modello OpenAI usato per generare il nome file dalle immagini."
+
+msgid "Website Info"
+msgstr "Info Sito"
+
+msgid "Optional context about your website used in the AI prompt."
+msgstr "Contesto opzionale del sito usato nel prompt AI."
+
+msgid "Brand"
+msgstr "Brand"
+
+msgid "Brand keyword to include in generated filenames."
+msgstr "Keyword del brand da includere nei nomi file generati."
+
+msgid "Delay between requests (seconds)"
+msgstr "Ritardo tra richieste (secondi)"
+
+msgid "Delay used during Batch AI Rename to reduce rate-limit errors."
+msgstr "Ritardo usato durante Batch AI Rename per ridurre errori di rate limit."
+
+msgid "Configure AI rename settings for automatic SEO filenames."
+msgstr "Configura le impostazioni AI per generare nomi file SEO automatici."
+
+msgid "A key is already saved. Leave this field empty to keep it."
+msgstr "Una chiave e gia salvata. Lascia questo campo vuoto per mantenerla."
+
+msgid "Invalid attachment."
+msgstr "Allegato non valido."
+
+msgid "OpenAI API key is missing."
+msgstr "Chiave API OpenAI mancante."
+
+msgid "Attachment file not found."
+msgstr "File allegato non trovato."
+
+msgid "AI rename currently supports images only."
+msgstr "La rinomina AI supporta al momento solo immagini."
+
+msgid "Unable to read the attachment file."
+msgstr "Impossibile leggere il file allegato."
+
+msgid "OpenAI request failed. Please try again."
+msgstr "Richiesta OpenAI non riuscita. Riprova."
+
+msgid "OpenAI returned an error. Please check your API key, model, and usage limits."
+msgstr "OpenAI ha restituito un errore. Controlla chiave API, modello e limiti di utilizzo."
+
+msgid "Invalid OpenAI response format."
+msgstr "Formato risposta OpenAI non valido."
+
+msgid "OpenAI did not return a filename."
+msgstr "OpenAI non ha restituito un nome file."
+
+msgid "Selected AI provider is not supported."
+msgstr "Il provider AI selezionato non e supportato."
+
+msgid "AI rename is disabled in plugin settings."
+msgstr "La rinomina AI e disabilitata nelle impostazioni del plugin."
+
+msgid "OpenAI API key is not configured."
+msgstr "La chiave API OpenAI non e configurata."
+
+msgid "AI generated an empty filename."
+msgstr "L'AI ha generato un nome file vuoto."
+
+msgid "Set your OpenAI API key in AI Rename settings to enable this feature."
+msgstr "Imposta la chiave API OpenAI nelle impostazioni AI Rename per abilitare questa funzione."
+
+msgid "Generating filename with AI..."
+msgstr "Generazione nome file con AI in corso..."
+
+msgid "AI rename completed successfully."
+msgstr "Rinomina AI completata con successo."
+
+msgid "AI rename failed."
+msgstr "Rinomina AI non riuscita."
+
+msgid "Set your OpenAI API key in AI Rename settings to use this feature."
+msgstr "Imposta la chiave API OpenAI nelle impostazioni AI Rename per usare questa funzione."
+
+msgid "Set your OpenAI API key in AI Rename settings to enable Batch AI Rename."
+msgstr "Imposta la chiave API OpenAI nelle impostazioni AI Rename per abilitare Batch AI Rename."
+
+msgid "Batch AI Rename delay: %s seconds between requests."
+msgstr "Ritardo Batch AI Rename: %s secondi tra le richieste."
+
+msgid "Batch AI Rename"
+msgstr "Batch AI Rename"
+
+msgid "Process cancelled."
+msgstr "Processo annullato."
+
+msgid "Cancelling..."
+msgstr "Annullamento in corso..."
+
+msgid "Are you sure you want to generate AI names for %d files?"
+msgstr "Sei sicuro di voler generare nomi AI per %d file?"
+
+msgid "Set your OpenAI API key and enable AI Rename in settings first."
+msgstr "Imposta la chiave API OpenAI e abilita AI Rename nelle impostazioni."
+
+msgid "You can rename maximum 100 files at once."
+msgstr "Puoi rinominare massimo 100 file alla volta."
+
+msgid "OpenAI file upload failed."
+msgstr "Caricamento file su OpenAI non riuscito."
+
+msgid "Invalid OpenAI file upload response."
+msgstr "Risposta di upload file OpenAI non valida."
+
+msgid "This file type is skipped by AI rename."
+msgstr "Questo tipo di file viene saltato dalla rinomina AI."
+
+msgid "AI rename skipped this unsupported file type."
+msgstr "La rinomina AI ha saltato questo tipo di file non supportato."
+
+msgid "Unable to analyze this file type with AI. File skipped."
+msgstr "Impossibile analizzare questo tipo di file con AI. File saltato."
+
+msgid "Automatically rename this file with AI"
+msgstr "Rinomina automaticamente questo file con AI"
+
+msgid "Enable AI Rename in plugin settings to use this feature."
+msgstr "Abilita AI Rename nelle impostazioni del plugin per usare questa funzione."
+
+msgid "Max files per batch"
+msgstr "Max file per batch"
+
+msgid "Maximum files allowed for Batch AI Rename. Set 0 for unlimited."
+msgstr "Numero massimo di file consentiti per Batch AI Rename. Imposta 0 per illimitato."
+
+msgid "Batch AI Rename max files: %s."
+msgstr "Batch AI Rename max file: %s."
+
+msgid "Batch AI Rename max files: unlimited."
+msgstr "Batch AI Rename max file: illimitato."
+
+msgid "Automatically rename selected files with AI"
+msgstr "Rinomina automaticamente i file selezionati con AI"
+
+msgid "Rename selected files with manual base name"
+msgstr "Rinomina i file selezionati con nome base manuale"
+
+msgid "Batch AI Rename limit exceeded. Reduce selected files or increase max files in settings."
+msgstr "Limite Batch AI Rename superato. Riduci i file selezionati o aumenta il limite nelle impostazioni."
+
+msgid "You can rename maximum %d files in one Batch AI Rename."
+msgstr "Puoi rinominare al massimo %d file in un Batch AI Rename."
+
