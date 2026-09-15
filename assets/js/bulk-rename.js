@@ -1,186 +1,370 @@
 jQuery(document).ready(function ($) {
-  let renameProcessStarted = false; // Tracks if the rename operation was triggered
-  const delay = fmrseoBulkRenameIds.length * 150;
 
-  // Display the modal only if there are IDs to rename
-  if (
-    typeof fmrseoBulkRenameIds !== "undefined" &&
-    Array.isArray(fmrseoBulkRenameIds) &&
-    fmrseoBulkRenameIds.length > 0
-  ) {
+  // ─── STATE FLAGS ────────────────────────────────────────────────────────────
+
+  let renameProcessStarted = false; // True once the user has launched any rename operation
+  let isProcessing         = false; // True while an AJAX operation is running
+  let isCancelled          = false; // True if the user pressed "Cancel" during AI processing
+  let aiResults            = [];    // Accumulates results from each AI batch step
+
+  // ─── CONFIGURATION ──────────────────────────────────────────────────────────
+
+  // Sanitize and validate the list of post IDs passed from PHP
+  const ids = (
+    typeof fmrseoBulkRenameIds !== "undefined" && Array.isArray(fmrseoBulkRenameIds)
+      ? fmrseoBulkRenameIds.map((id) => Number(id)).filter((id) => id > 0)
+      : []
+  );
+
+  const totalItems   = ids.length;
+
+  // AI-specific settings passed from PHP (with safe fallbacks)
+  const aiDelayMs    = Math.max(0, Number(fmrseoBulkRename.ai_delay_ms  || 2000)); // ms to wait between AI batches
+  const aiBatchSize  = Math.max(1, Math.min(5, Number(fmrseoBulkRename.ai_batch_size || 1))); // items per AI batch (1–5)
+  const aiMaxFiles   = Math.max(0, Number(fmrseoBulkRename.ai_max_files || 0)); // 0 = no limit
+
+  // ─── INIT: SHOW MODAL ───────────────────────────────────────────────────────
+
+  // Only open the modal if there is at least one file to rename
+  if (totalItems > 0) {
     $("#fmrseo-bulk-rename-modal").show();
     $("#fmrseo-bulk-name").focus().select();
   }
 
-  // Handle modal close actions: clicking the close icon or a custom reload button
-  $(
-    ".fmrseo-close, .fmrseo-reload-button, #fmrseo-cancel-bulk, #fmrseo-close-bulk"
-  ).on("click", handleModalClose);
+  // ─── EVENT LISTENERS ────────────────────────────────────────────────────────
 
-  // Close modal when clicking outside of it (only reloads if a rename was performed)
+  // Close button, reload button → close the modal (and reload the page if needed)
+  $(".fmrseo-close, .fmrseo-reload-button, #fmrseo-close-bulk").on("click", handleModalClose);
+
+  // Cancel button:
+  //   • If a process is running  → set the cancellation flag (the loop will stop at the next batch)
+  //   • If nothing is running    → just close the modal
+  $("#fmrseo-cancel-bulk").on("click", function () {
+    if (isProcessing) {
+      isCancelled = true;
+      $(".fmrseo-progress-text").text(fmrseoBulkRename.strings.cancelling);
+      return;
+    }
+    handleModalClose();
+  });
+
+  // Clicking outside the modal closes it, but NOT while a process is running
   $(window).on("click", function (event) {
-    if (event.target.id === "fmrseo-bulk-rename-modal") {
+    if (event.target.id === "fmrseo-bulk-rename-modal" && !isProcessing) {
       handleModalClose();
     }
   });
 
-  // Allow submission by pressing Enter inside the input field
+  // Allow the user to submit the form by pressing Enter inside the name input
   $("#fmrseo-bulk-name").on("keydown", function (e) {
     if (e.key === "Enter") {
       $("#fmrseo-start-bulk").click();
     }
   });
 
-  // Handle click on "Start Bulk Rename" button
+  // ─── MANUAL RENAME ──────────────────────────────────────────────────────────
+
+  // User clicks "Start Bulk Rename" → rename all files using the typed base name
   $("#fmrseo-start-bulk").on("click", function () {
     const baseName = $("#fmrseo-bulk-name").val().trim();
 
-    // Ensure base name is not empty
+    // The base name must not be empty
     if (!baseName) {
-      alert("Please enter a base name for the files.");
+      alert(fmrseoBulkRename.strings.missing_base_name);
       $("#fmrseo-bulk-name").focus();
       return;
     }
 
-    // Confirm the bulk rename action with the user
-    if (
-      !confirm(
-        `Are you sure you want to rename ${fmrseoBulkRenameIds.length} files?`
-      )
-    ) {
+    // Ask for confirmation before doing anything irreversible
+    const confirmText = formatString(fmrseoBulkRename.strings.confirm_manual, totalItems);
+    if (!confirm(confirmText)) {
       return;
     }
 
-    renameProcessStarted = true; // Mark that the rename process has been initiated
-
-    // Disable the start button and show the progress interface
-    $(this).prop("disabled", true);
-    $("#fmrseo-start-bulk").hide();
-    $("#fmrseo-cancel-bulk").hide();
-    $("#fmrseo-close-bulk").show();
-    $(".fmrseo-progress").show();
-    $(".fmrseo-results").empty().show();
-
-    processBulkRename(fmrseoBulkRenameIds, baseName);
+    startManualBulkRename(baseName);
   });
 
-  // Perform AJAX request to server for bulk renaming
-  function processBulkRename(postIds, baseName) {
+  // Sends all IDs + the base name to the server in a single AJAX call
+  function startManualBulkRename(baseName) {
+    prepareProcessUi();
+
     $.post(fmrseoBulkRename.ajax_url, {
-      action: "fmrseo_bulk_rename",
-      post_ids: postIds,
+      action:    "fmrseo_bulk_rename",
+      post_ids:  ids,
       base_name: baseName,
-      nonce: fmrseoBulkRename.nonce,
+      nonce:     fmrseoBulkRename.nonce,
     })
       .done(function (response) {
-        if (response.success) {
-          // Simulate progress bar based on estimated rename time
-          simulateProgress(delay, function () {
-            // When time completes, enable close button
-            $("#fmrseo-close-bulk").prop("disabled", false);
-          });
-
-          // Fallback: force enable close button after max 10s
-          setTimeout(() => {
-            $("#fmrseo-close-bulk").prop("disabled", false);
-          }, 10000);
-
-          // Show results after delay (synchronized with progress)
-          setTimeout(() => {
-            displayResults(response.data);
-            $(".fmrseo-progress-text").text(fmrseoBulkRename.strings.completed);
-          }, delay);
-        } else {
-          displayError(response.data.message); // Show error message from server
+        if (!response.success) {
+          displayError(response.data.message || fmrseoBulkRename.strings.error);
+          finishProcess();
+          return;
         }
+
+        // Show every renamed file and mark the progress bar as complete
+        displayResults(response.data || []);
+        updateProgress(100);
+        $(".fmrseo-progress-text").text(fmrseoBulkRename.strings.completed);
+        finishProcess();
       })
       .fail(function () {
-        displayError(fmrseoBulkRename.strings.error); // Generic error on request failure
-      })
-      .always(function () {
-        // Fallback: force enable close button after max 15s
-        setTimeout(() => {
-          $("#fmrseo-close-bulk").prop("disabled", false);
-        }, 15000);
+        displayError(fmrseoBulkRename.strings.error);
+        finishProcess();
       });
   }
 
-  // Update the progress bar and its label
-  function updateProgress(percentage) {
-    $(".fmrseo-progress-fill").css("width", percentage + "%");
-    $(".fmrseo-progress-text").text(percentage + "%");
+  // ─── AI RENAME ──────────────────────────────────────────────────────────────
+
+  // User clicks "Start AI Rename" → rename files one batch at a time using AI
+  $("#fmrseo-start-bulk-ai").on("click", function () {
+
+    // AI must be enabled and an API key must be configured on the server
+    if (!fmrseoBulkRename.ai_enabled || !fmrseoBulkRename.ai_key_set) {
+      alert(fmrseoBulkRename.strings.ai_unavailable);
+      return;
+    }
+
+    // Respect the maximum file limit for AI (if one is set)
+    if (aiMaxFiles > 0 && totalItems > aiMaxFiles) {
+      alert(fmrseoBulkRename.strings.ai_limit_reached);
+      return;
+    }
+
+    // Ask for confirmation before starting (AI calls may cost money or take time)
+    const confirmText = formatString(fmrseoBulkRename.strings.confirm_ai, totalItems);
+    if (!confirm(confirmText)) {
+      return;
+    }
+
+    // Reset accumulated results and start from offset 0
+    aiResults = [];
+    prepareProcessUi();
+    processAIBatch(0);
+  });
+
+  /**
+   * Processes one batch of files via AI, then schedules the next batch.
+   * The server handles one batch at a time and returns the next offset,
+   * so this function calls itself recursively until all files are processed
+   * or the user cancels.
+   *
+   * @param {number} offset - Index of the first file to process in this batch
+   */
+  function processAIBatch(offset) {
+
+    // Stop immediately if the user pressed "Cancel"
+    if (isCancelled) {
+      finishCancelled();
+      return;
+    }
+
+    $.post(fmrseoBulkRename.ajax_url, {
+      action:     "fmrseo_bulk_ai_rename_step",
+      post_ids:   ids,
+      offset:     offset,
+      batch_size: aiBatchSize,
+      nonce:      fmrseoBulkRename.ai_nonce,
+    })
+      .done(function (response) {
+        if (!response.success) {
+          displayError(response.data.message || fmrseoBulkRename.strings.error);
+          finishProcess();
+          return;
+        }
+
+        const data        = response.data || {};
+        const stepResults = Array.isArray(data.results) ? data.results : [];
+        const nextOffset  = Number(data.next_offset || 0);
+        const done        = Boolean(data.done);
+
+        // Append this batch's results to the full list and refresh the display
+        if (stepResults.length > 0) {
+          aiResults = aiResults.concat(stepResults);
+          displayResults(aiResults);
+        }
+
+        // Update the progress bar based on how many files have been processed
+        const percentage = totalItems > 0
+          ? Math.min(Math.round((nextOffset / totalItems) * 100), 100)
+          : 100;
+        updateProgress(percentage);
+
+        // If the server says we're done (or we've passed all IDs), stop here
+        if (done || nextOffset >= totalItems) {
+          $(".fmrseo-progress-text").text(fmrseoBulkRename.strings.completed);
+          finishProcess();
+          return;
+        }
+
+        // Wait the configured delay before sending the next batch
+        // (avoids hammering the AI API and gives the UI time to breathe)
+        setTimeout(function () {
+          processAIBatch(nextOffset);
+        }, aiDelayMs);
+      })
+      .fail(function () {
+        displayError(fmrseoBulkRename.strings.error);
+        finishProcess();
+      });
   }
 
-  // Display rename results in a readable format
+  // ─── UI HELPERS ─────────────────────────────────────────────────────────────
+
+  /**
+   * Prepares the modal UI before any rename operation starts:
+   * shows the progress bar, disables inputs, resets state flags.
+   */
+  function prepareProcessUi() {
+    renameProcessStarted = true;
+    isProcessing         = true;
+    isCancelled          = false;
+
+    $(".fmrseo-progress").show();
+    $(".fmrseo-results").empty().show();
+
+    // Close button is shown but kept disabled until the process ends
+    $("#fmrseo-close-bulk").show().prop("disabled", true);
+
+    // Lock all inputs while the operation is running
+    $("#fmrseo-start-bulk").prop("disabled", true);
+    $("#fmrseo-start-bulk-ai").prop("disabled", true);
+    $("#fmrseo-bulk-name").prop("disabled", true);
+
+    $(".fmrseo-progress-text").text(fmrseoBulkRename.strings.processing);
+    updateProgress(0);
+  }
+
+  // Called when a process finishes successfully: unlocks the Close button
+  function finishProcess() {
+    isProcessing = false;
+    $("#fmrseo-close-bulk").prop("disabled", false);
+  }
+
+  // Called when the user cancels mid-process: shows a cancellation message
+  function finishCancelled() {
+    displayError(fmrseoBulkRename.strings.cancelled);
+    isProcessing = false;
+    $("#fmrseo-close-bulk").prop("disabled", false);
+  }
+
+  // Moves the progress bar to the given percentage (0–100)
+  function updateProgress(percentage) {
+    $(".fmrseo-progress-fill").css("width", percentage + "%");
+
+    // Only overwrite the label while processing
+    // (after completion the caller sets its own label, e.g. "Completed")
+    if (isProcessing) {
+      $(".fmrseo-progress-text").text(percentage + "%");
+    }
+  }
+
+  /**
+   * Renders the list of rename results inside the modal.
+   * Each item shows a green checkmark on success or a red cross on failure.
+   *
+   * @param {Array} results - Array of result objects from the server
+   */
   function displayResults(results) {
-    const html = ["<h4>Results:</h4><ul>"];
-    results.forEach(({ success, old_name, new_name, post_id, message }) => {
+    const html = ["<h4>" + fmrseoBulkRename.strings.results + "</h4><ul>"];
+
+    results.forEach(function (result) {
+      const success     = Boolean(result.success);
       const statusClass = success ? "success" : "error";
-      const statusIcon = success ? "✓" : "✗";
+      const statusIcon  = success ? "&#10003;" : "&#10007;"; // ✓ or ✗
+
+      // Success → show "old name → new name"
+      // Failure → show the post ID and the error message
       const resultText = success
-        ? `<strong>${old_name}</strong> → <strong>${new_name}</strong>`
-        : `ID: ${post_id} - ${message}`;
+        ? "<strong>" + escapeHtml(result.old_name) + "</strong> &rarr; <strong>" + escapeHtml(result.new_name) + "</strong>"
+        : "ID: " + escapeHtml(result.post_id) + " - " + escapeHtml(result.message || "");
 
       html.push(
-        `<li class=\"fmrseo-result-${statusClass}\"><span class=\"fmrseo-status-icon\">${statusIcon}</span> ${resultText}</li>`
+        '<li class="fmrseo-result-' + statusClass + '">' +
+          '<span class="fmrseo-status-icon">' + statusIcon + '</span> ' +
+          resultText +
+        '</li>'
       );
     });
+
     html.push("</ul>");
     $(".fmrseo-results").html(html.join(""));
   }
 
-  // Show a general or specific error message in the result section
+  // Shows a red error message in the results area and resets the progress bar
   function displayError(message) {
     $(".fmrseo-results").html(
-      `<div class=\"fmrseo-error\">Error: ${message}</div>`
+      '<div class="fmrseo-error">' +
+        fmrseoBulkRename.strings.error_prefix + " " +
+        escapeHtml(message || fmrseoBulkRename.strings.error) +
+      "</div>"
     );
-    updateProgress(0);
   }
 
+  // ─── MODAL CLOSE & PAGE RELOAD ──────────────────────────────────────────────
+
   /**
-   * Handles the logic for closing the modal dialog.
-   * If the bulk rename process was initiated, this function will:
-   *   - Clean the current URL by removing any temporary query parameters used to trigger the modal
-   *   - Append a timestamp parameter to bypass browser cache
-   *   - Reload the page with the cleaned URL
-   * This reset ensures the modal is not shown again on page reload and that fresh content is loaded.
+   * Handles closing the modal dialog.
+   *
+   * If a rename operation was performed, we cannot just close the modal:
+   * the media library page still shows the old file names. So we clean the
+   * URL (removing temporary query parameters added to trigger this modal)
+   * and force a full page reload so the library reflects the new names.
+   *
+   * If no rename was started, we just hide the modal without reloading.
    */
   function handleModalClose() {
+
+    // Never close while an AJAX operation is still in flight
+    if (isProcessing) {
+      return;
+    }
+
     $("#fmrseo-bulk-rename-modal").hide();
 
     if (renameProcessStarted) {
-      let url = window.location.href
-        .replace(/([?&])fmrseo_bulk_rename=1(&)?/, (match, p1, p2) =>
-          p2 ? p1 : ""
-        )
-        .replace(/([?&])fmrseo_force_reload=\d+(&)?/, (match, p1, p2) =>
-          p2 ? p1 : ""
-        )
-        .replace(/[?&]$/, "");
 
+      // Strip the temporary parameters added by the plugin to open this modal
+      let url = window.location.href
+        .replace(/([?&])fmrseo_bulk_rename=1(&)?/, function (match, p1, p2) {
+          return p2 ? p1 : "";
+        })
+        .replace(/([?&])fmrseo_bulk_rename_nonce=[^&]*(&)?/, function (match, p1, p2) {
+          return p2 ? p1 : "";
+        })
+        .replace(/([?&])fmrseo_force_reload=\d+(&)?/, function (match, p1, p2) {
+          return p2 ? p1 : "";
+        })
+        .replace(/[?&]$/, ""); // Remove any trailing ? or & left behind
+
+      // Append a unique timestamp to bypass the browser cache and force a fresh load
       const separator = url.includes("?") ? "&" : "?";
-      const reloadUrl = url + separator + "fmrseo_force_reload=" + Date.now();
-      window.location.href = reloadUrl;
+      window.location.href = url + separator + "fmrseo_force_reload=" + Date.now();
     }
   }
+
+  // ─── UTILITY FUNCTIONS ──────────────────────────────────────────────────────
+
   /**
-   * Simulates a progress bar over a specified duration.
-   * @param {number} duration - Duration in milliseconds for the progress simulation.
-   * @param {function} onComplete - Callback function to execute when progress completes.
+   * Replaces the first "%d" placeholder in a template string with a number.
+   * Used to build confirmation messages like "Are you sure? 5 files will be renamed."
+   *
+   * @param {string} template - String containing "%d"
+   * @param {number} count    - Number to insert
+   * @returns {string}
    */
-  function simulateProgress(duration, onComplete) {
-    const start = Date.now();
-    const interval = 100; // update every 100ms
-
-    const timer = setInterval(() => {
-      const elapsed = Date.now() - start;
-      let percent = Math.min((elapsed / duration) * 100, 100);
-      updateProgress(Math.floor(percent));
-
-      if (percent >= 100) {
-        clearInterval(timer);
-        if (typeof onComplete === "function") onComplete();
-      }
-    }, interval);
+  function formatString(template, count) {
+    return String(template || "").replace("%d", String(count));
   }
+
+  /**
+   * Escapes a value so it is safe to inject into HTML.
+   * Prevents XSS when displaying file names returned by the server.
+   *
+   * @param {*} value - Any value (will be converted to string)
+   * @returns {string} HTML-escaped string
+   */
+  function escapeHtml(value) {
+    return $("<div>").text(value == null ? "" : String(value)).html();
+  }
+
 });
