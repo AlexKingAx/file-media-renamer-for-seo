@@ -3,8 +3,8 @@ Contributors: alexwebitaly
 Donate link: https://filemediarenamerwp.com/
 Tags: rename media files, image titles, alt text, bulk rename images, image seo
 Requires at least: 4.0
-Tested up to: 6.8
-Stable tag: 1.0.2
+Tested up to: 6.9
+Stable tag: 1.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -31,6 +31,10 @@ The plugin focuses on safe renaming, performance, and SEO best practices, with f
 * Rename multiple files at once via Media Library bulk actions
 * Sequential naming (e.g., new-name-1, new-name-2) for consistent batches
 * Real-time progress and batch processing up to 50 files
+
+= AI Renaming with OpenAI Key for Bulk and Individual =
+* Rename multiple files at once via Media Library bulk actions with AI button
+* Rename any media file directly from the WordPress Media Library with AI
 
 = Automatic Content Updates =
 * Updates references in posts, pages, custom post types, and metadata

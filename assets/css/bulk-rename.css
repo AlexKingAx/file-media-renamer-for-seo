@@ -17,7 +17,7 @@
   border-radius: 12px;
   padding: 0;
   width: 90%;
-  max-width: 500px;
+  max-width: 700px;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   animation: fadeIn 0.2s ease-out;
@@ -76,6 +76,9 @@
   display: block;
   font-weight: 600;
   margin-bottom: 6px;
+}
+
+.fmrseo-form-group label, .fmrseo-form-group p  {
   color: #a1a1aa;
 }
 
@@ -173,15 +176,19 @@
   border-top: 1px solid #2c2b29;
   background-color: #0b0a08;
   display: flex;
+  flex: wrap;
   justify-content: flex-end;
   gap: 12px;
+}
+.fmrseo-modal-footer button{
+  max-height: 35px;
 }
 
 /* PRIMARY BUTTON (Solid Orange) */
 .fmrseo-modal-footer .button-primary {
   background-color: #ea8b46;
   color: #0b0a08;
-  padding: 10px 18px;
+  padding: 0px 10px;
   border-radius: 6px;
   font-weight: 600;
   border: none;
@@ -193,11 +200,47 @@
   background-color: #d1783c;
 }
 
+.fmrseo-modal-footer .fmrseo-ai-bulk-button {
+  background-image: linear-gradient(to right, #61DAFB , #1fc0f1 , #03a3d7);
+  color: black;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fmrseo-modal-footer .fmrseo-ai-bulk-button:hover,
+.fmrseo-modal-footer .fmrseo-ai-bulk-button:focus {
+  background-image: linear-gradient(to left, #61DAFB , #1fc0f1 , #03a3d7);
+}
+
+.fmrseo-modal-footer .fmrseo-ai-bulk-button[disabled],
+.fmrseo-modal-footer .fmrseo-ai-bulk-button:disabled {
+  background-color: #7c3aed;
+  border-color: #7c3aed;
+  color: #ffffff;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fmrseo-modal-footer .fmrseo-manual-bulk-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fmrseo-modal-footer .fmrseo-manual-bulk-button .dashicons,
+.fmrseo-modal-footer .fmrseo-ai-bulk-button .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+}
+
 /* SECONDARY BUTTON (Orange Outline) */
 .fmrseo-modal-footer .button-secondary {
   background-color: transparent;
   color: #ea8b46;
-  padding: 10px 18px;
+  padding: 0px 10px;
   border-radius: 6px;
   font-weight: 600;
   border: 2px solid #ea8b46;

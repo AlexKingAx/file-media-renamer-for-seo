@@ -10,3 +10,184 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+msgid "General"
+msgstr "General"
+
+msgid "AI Rename"
+msgstr "AI Rename"
+
+msgid "Enable AI rename"
+msgstr "Enable AI rename"
+
+msgid "Enable automatic AI filename generation."
+msgstr "Enable automatic AI filename generation."
+
+msgid "AI Provider"
+msgstr "AI Provider"
+
+msgid "OpenAI"
+msgstr "OpenAI"
+
+msgid "Select the AI provider to use for renaming."
+msgstr "Select the AI provider to use for renaming."
+
+msgid "API Key"
+msgstr "API Key"
+
+msgid "Enter your OpenAI API key. Leave empty to keep the current key."
+msgstr "Enter your OpenAI API key. Leave empty to keep the current key."
+
+msgid "Model"
+msgstr "Model"
+
+msgid "OpenAI model name used for image-based filename generation."
+msgstr "OpenAI model name used for image-based filename generation."
+
+msgid "Website Info"
+msgstr "Website Info"
+
+msgid "Optional context about your website used in the AI prompt."
+msgstr "Optional context about your website used in the AI prompt."
+
+msgid "Brand"
+msgstr "Brand"
+
+msgid "Brand keyword to include in generated filenames."
+msgstr "Brand keyword to include in generated filenames."
+
+msgid "Delay between requests (seconds)"
+msgstr "Delay between requests (seconds)"
+
+msgid "Delay used during Batch AI Rename to reduce rate-limit errors."
+msgstr "Delay used during Batch AI Rename to reduce rate-limit errors."
+
+msgid "Configure AI rename settings for automatic SEO filenames."
+msgstr "Configure AI rename settings for automatic SEO filenames."
+
+msgid "A key is already saved. Leave this field empty to keep it."
+msgstr "A key is already saved. Leave this field empty to keep it."
+
+msgid "Invalid attachment."
+msgstr "Invalid attachment."
+
+msgid "OpenAI API key is missing."
+msgstr "OpenAI API key is missing."
+
+msgid "Attachment file not found."
+msgstr "Attachment file not found."
+
+msgid "AI rename currently supports images only."
+msgstr "AI rename currently supports images only."
+
+msgid "Unable to read the attachment file."
+msgstr "Unable to read the attachment file."
+
+msgid "OpenAI request failed. Please try again."
+msgstr "OpenAI request failed. Please try again."
+
+msgid "OpenAI returned an error. Please check your API key, model, and usage limits."
+msgstr "OpenAI returned an error. Please check your API key, model, and usage limits."
+
+msgid "Invalid OpenAI response format."
+msgstr "Invalid OpenAI response format."
+
+msgid "OpenAI did not return a filename."
+msgstr "OpenAI did not return a filename."
+
+msgid "Selected AI provider is not supported."
+msgstr "Selected AI provider is not supported."
+
+msgid "AI rename is disabled in plugin settings."
+msgstr "AI rename is disabled in plugin settings."
+
+msgid "OpenAI API key is not configured."
+msgstr "OpenAI API key is not configured."
+
+msgid "AI generated an empty filename."
+msgstr "AI generated an empty filename."
+
+msgid "Set your OpenAI API key in AI Rename settings to enable this feature."
+msgstr "Set your OpenAI API key in AI Rename settings to enable this feature."
+
+msgid "Generating filename with AI..."
+msgstr "Generating filename with AI..."
+
+msgid "AI rename completed successfully."
+msgstr "AI rename completed successfully."
+
+msgid "AI rename failed."
+msgstr "AI rename failed."
+
+msgid "Set your OpenAI API key in AI Rename settings to use this feature."
+msgstr "Set your OpenAI API key in AI Rename settings to use this feature."
+
+msgid "Set your OpenAI API key in AI Rename settings to enable Batch AI Rename."
+msgstr "Set your OpenAI API key in AI Rename settings to enable Batch AI Rename."
+
+msgid "Batch AI Rename delay: %s seconds between requests."
+msgstr "Batch AI Rename delay: %s seconds between requests."
+
+msgid "Batch AI Rename"
+msgstr "Batch AI Rename"
+
+msgid "Process cancelled."
+msgstr "Process cancelled."
+
+msgid "Cancelling..."
+msgstr "Cancelling..."
+
+msgid "Are you sure you want to generate AI names for %d files?"
+msgstr "Are you sure you want to generate AI names for %d files?"
+
+msgid "Set your OpenAI API key and enable AI Rename in settings first."
+msgstr "Set your OpenAI API key and enable AI Rename in settings first."
+
+msgid "You can rename maximum 100 files at once."
+msgstr "You can rename maximum 100 files at once."
+
+msgid "OpenAI file upload failed."
+msgstr "OpenAI file upload failed."
+
+msgid "Invalid OpenAI file upload response."
+msgstr "Invalid OpenAI file upload response."
+
+msgid "This file type is skipped by AI rename."
+msgstr "This file type is skipped by AI rename."
+
+msgid "AI rename skipped this unsupported file type."
+msgstr "AI rename skipped this unsupported file type."
+
+msgid "Unable to analyze this file type with AI. File skipped."
+msgstr "Unable to analyze this file type with AI. File skipped."
+
+msgid "Automatically rename this file with AI"
+msgstr "Automatically rename this file with AI"
+
+msgid "Enable AI Rename in plugin settings to use this feature."
+msgstr "Enable AI Rename in plugin settings to use this feature."
+
+msgid "Max files per batch"
+msgstr "Max files per batch"
+
+msgid "Maximum files allowed for Batch AI Rename. Set 0 for unlimited."
+msgstr "Maximum files allowed for Batch AI Rename. Set 0 for unlimited."
+
+msgid "Batch AI Rename max files: %s."
+msgstr "Batch AI Rename max files: %s."
+
+msgid "Batch AI Rename max files: unlimited."
+msgstr "Batch AI Rename max files: unlimited."
+
+msgid "Automatically rename selected files with AI"
+msgstr "Automatically rename selected files with AI"
+
+msgid "Rename selected files with manual base name"
+msgstr "Rename selected files with manual base name"
+
+msgid "Batch AI Rename limit exceeded. Reduce selected files or increase max files in settings."
+msgstr "Batch AI Rename limit exceeded. Reduce selected files or increase max files in settings."
+
+msgid "You can rename maximum %d files in one Batch AI Rename."
+msgstr "You can rename maximum %d files in one Batch AI Rename."
+
