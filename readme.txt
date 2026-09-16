@@ -143,6 +143,10 @@ On very large batches, an individual AI request can occasionally take longer tha
 * Add a client-side timeout to Batch/AI rename requests so a hung request now fails gracefully instead of freezing the whole batch indefinitely
 * Fix plugin JS/CSS assets not updating in the browser after a plugin update (automatic cache-busting)
 * General sanitization and code cleanliness pass
+* Add support for OpenAI's reasoning models (o1/o3, GPT-5.x, GPT-5.6 Sol/Terra/Luna, GPT-6 Astra and future versions under these families) by sending a low `reasoning` effort automatically - keeps filename generation fast and cheap instead of using the model's default (often "medium") reasoning depth
+* Classic, non-reasoning OpenAI models (e.g. gpt-4o, gpt-4.1-mini) are unaffected - the request payload is unchanged for them
+* Update the default OpenAI model for new installs to `gpt-5.6-luna`; existing saved model settings are not changed
+* Add a clear, logged error message if a selected OpenAI model rejects the reasoning effort parameter, instead of a generic failure
 
 == Upgrade Notice ==
 
@@ -153,5 +157,5 @@ First stable release of File Media Renamer for SEO. Includes safe renaming, auto
 * Fix a bug in redirect generation
 
 = 1.2 =
-Adds Claude and Gemini as AI Rename providers, fixes title/slug/alt text sometimes not updating after a rename, adds a "Retry failed" button for Batch AI Rename, and improves reliability on large batches. Recommended update for all users.
+Adds Claude and Gemini as AI Rename providers (plus support for OpenAI's newer reasoning models like GPT-5.x/GPT-5.6 Sol/Terra/Luna and GPT-6 Astra), fixes title/slug/alt text sometimes not updating after a rename, adds a "Retry failed" button for Batch AI Rename, and improves reliability on large batches. Recommended update for all users.
 
