@@ -4,7 +4,7 @@ Donate link: https://filemediarenamerwp.com/
 Tags: rename media files, image titles, alt text, bulk rename images, image seo
 Requires at least: 4.0
 Tested up to: 7.1
-Stable tag: 1.1
+Stable tag: 1.2
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -32,7 +32,7 @@ The plugin focuses on safe renaming, performance, and SEO best practices, with f
 * Sequential naming (e.g., new-name-1, new-name-2) for consistent batches
 * Real-time progress and batch processing up to 50 files
 
-= AI Renaming with OpenAI Key for Bulk and Individual =
+= AI Renaming with OpenAI, Claude or Gemini for Bulk and Individual =
 * Rename multiple files at once via Media Library bulk actions with AI button
 * Rename any media file directly from the WordPress Media Library with AI
 
@@ -115,6 +115,9 @@ Yes. All image sizes are renamed and redirected together with the main file.
 = Do redirects impact SEO? =
 301 redirects preserve SEO value and help search engines understand the change.
 
+= My Batch AI Rename stopped partway through a large batch (50-100+ files) - what happened? =
+On very large batches, an individual AI request can occasionally take longer than your hosting's PHP `max_execution_time` (often 30s on shared hosting) or the AI provider's own response time under load, causing that single step to time out. When this happens the affected file(s) are marked as failed instead of the whole batch silently freezing, and you can click **Retry failed** to resume just those files without restarting the entire batch. If you run large batches regularly, consider asking your host to raise `max_execution_time` to 60-120 seconds, and keep the browser tab active/in the foreground while a large batch runs (backgrounded tabs can be throttled by the browser).
+
 == Screenshots ==
 
 1. Rename media files directly from the library
@@ -129,6 +132,18 @@ Yes. All image sizes are renamed and redirected together with the main file.
 = 1.0.1 =
 * Fix redirect generation
 
+= 1.2 =
+* Add Claude (Anthropic) and Gemini (Google) as AI Rename providers, alongside OpenAI
+* Fix a bug where thumbnail sizes sharing an identical physical file (common with page builders that register many crop/breakpoint sizes) could be left pointing at the old filename after a rename, breaking `srcset`
+* Fix a bug where a batch or multi-thumbnail rename could silently skip updating the title, slug (post_name) and alt text for some files, because a background scheduling check ignored the specific file being processed
+* Title, slug and alt text are now updated immediately when a file is renamed, instead of depending on WordPress cron
+* Add a "Retry failed" button to Batch AI Rename so files that failed (rate limits, provider errors, timeouts) can be retried without restarting the whole batch
+* Add clearer, provider-specific error messages for AI rename failures (e.g. when a model runs out of output tokens on internal reasoning, or is rate-limited)
+* Increase the AI response token budget to avoid failures on models that use "thinking"/reasoning tokens (Gemini 2.5+/3.x, Claude Sonnet)
+* Add a client-side timeout to Batch/AI rename requests so a hung request now fails gracefully instead of freezing the whole batch indefinitely
+* Fix plugin JS/CSS assets not updating in the browser after a plugin update (automatic cache-busting)
+* General sanitization and code cleanliness pass
+
 == Upgrade Notice ==
 
 = 1.0.0 =
@@ -136,4 +151,7 @@ First stable release of File Media Renamer for SEO. Includes safe renaming, auto
 
 = 1.0.1 =
 * Fix a bug in redirect generation
+
+= 1.2 =
+Adds Claude and Gemini as AI Rename providers, fixes title/slug/alt text sometimes not updating after a rename, adds a "Retry failed" button for Batch AI Rename, and improves reliability on large batches. Recommended update for all users.
 

@@ -3,7 +3,7 @@
  * Plugin Name: File Media Renamer for SEO
  * Plugin URI: https://filemediarenamerwp.com/
  * Description: A lightweight, fast plugin that improves SEO and streamlines your media workflow.
- * Version: 1.1
+ * Version: 1.2
  * Author: alexwebitaly
  * Author URI: https://alex-web.it/
  * Developer: alexwebitaly
@@ -25,7 +25,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-redirects.php';
 require_once plugin_dir_path(__FILE__) . 'includes/fmr-seo-bulk-rename.php';
 
 
-define('FMRSEO_VERSION', '1.0.0');
+define('FMRSEO_VERSION', '1.2');
 
 /**
  * Ensure the WordPress filesystem API is available.
@@ -222,7 +222,7 @@ function fmrseo_generate_ai_seo_name($post_id)
     }
 
     if (empty($ai_settings['api_key'])) {
-        return new WP_Error('fmrseo_ai_missing_key', esc_html__('OpenAI API key is not configured.', 'file-media-renamer-for-seo'));
+        return new WP_Error('fmrseo_ai_missing_key', esc_html__('AI provider API key is not configured.', 'file-media-renamer-for-seo'));
     }
 
     $provider = fmrseo_get_ai_provider_instance($ai_settings['provider']);
@@ -368,7 +368,7 @@ function fmrseo_add_seo_name_field_to_attachment($form_fields, $post)
     if (empty($ai_settings['enabled'])) {
         $ai_disabled_reason = esc_html__('AI rename is disabled in plugin settings.', 'file-media-renamer-for-seo');
     } elseif (empty($ai_settings['api_key'])) {
-        $ai_disabled_reason = esc_html__('Set your OpenAI API key in AI Rename settings to enable this feature.', 'file-media-renamer-for-seo');
+        $ai_disabled_reason = esc_html__('Set your AI provider API key in AI Rename settings to enable this feature.', 'file-media-renamer-for-seo');
     }
 
     $ai_button_html = '<button type="button" class="button fmrseo-ai-rename-button" data-media-id="' . esc_attr($post->ID) . '" title="' . esc_attr__('Automatically rename this file with AI', 'file-media-renamer-for-seo') . '"';
@@ -422,7 +422,9 @@ function fmrseo_enqueue_custom_admin_script()
     $ai_settings = fmrseo_get_ai_settings();
 
     wp_enqueue_script('jquery');
-    wp_enqueue_script('rename-media', plugin_dir_url(__FILE__) . 'assets/js/rename-media.js', array('jquery'), FMRSEO_VERSION, true);
+    $rename_media_js_path = plugin_dir_path(__FILE__) . 'assets/js/rename-media.js';
+    $rename_media_js_ver = file_exists($rename_media_js_path) ? (string) filemtime($rename_media_js_path) : FMRSEO_VERSION;
+    wp_enqueue_script('rename-media', plugin_dir_url(__FILE__) . 'assets/js/rename-media.js', array('jquery'), $rename_media_js_ver, true);
     wp_localize_script('rename-media', 'renameMedia', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('fmrseo_save_seo_name_nonce'),
@@ -434,7 +436,7 @@ function fmrseo_enqueue_custom_admin_script()
             'ai_processing' => esc_html__('Generating filename with AI...', 'file-media-renamer-for-seo'),
             'ai_success' => esc_html__('AI rename completed successfully.', 'file-media-renamer-for-seo'),
             'ai_error' => esc_html__('AI rename failed.', 'file-media-renamer-for-seo'),
-            'ai_missing_key' => esc_html__('Set your OpenAI API key in AI Rename settings to use this feature.', 'file-media-renamer-for-seo'),
+            'ai_missing_key' => esc_html__('Set your AI provider API key in AI Rename settings to use this feature.', 'file-media-renamer-for-seo'),
             'ai_disabled' => esc_html__('Enable AI Rename in plugin settings to use this feature.', 'file-media-renamer-for-seo'),
         ),
     ));
@@ -536,14 +538,29 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
             $thumbnail_name = $seo_name . '-' . $size_data['width'] . 'x' . $size_data['height'] . '.' . $thumbnail_ext;
             $new_thumbnail_path = trailingslashit($file_dir) . $thumbnail_name;
 
-            if (file_exists($old_thumbnail_path) && $old_thumbnail_path !== $new_thumbnail_path) {
+            if ($old_thumbnail_path === $new_thumbnail_path) {
+                continue;
+            }
+
+            $old_thumbnail_url = str_replace($wp_upload_dir['basedir'], $wp_upload_dir['baseurl'], $old_thumbnail_path);
+            $new_thumbnail_url = str_replace($wp_upload_dir['basedir'], $wp_upload_dir['baseurl'], $new_thumbnail_path);
+
+            // Some registered image sizes (common with Bricks breakpoint/crop sizes)
+            // can produce identical pixel dimensions and end up sharing the same
+            // physical file. In that case an earlier iteration of this loop may
+            // have already moved the shared file to $new_thumbnail_path. Just
+            // sync this size's metadata to the new name instead of skipping it.
+            if (file_exists($new_thumbnail_path)) {
+                $metadata['sizes'][$size]['file'] = $thumbnail_name;
+                fmrseo_add_redirect($old_thumbnail_url, $new_thumbnail_url);
+                continue;
+            }
+
+            if (file_exists($old_thumbnail_path)) {
                 $thumbnail_move = fmrseo_move_file($old_thumbnail_path, $new_thumbnail_path);
                 if (is_wp_error($thumbnail_move)) {
                     continue;
                 }
-
-                $old_thumbnail_url = str_replace($wp_upload_dir['basedir'], $wp_upload_dir['baseurl'], $old_thumbnail_path);
-                $new_thumbnail_url = str_replace($wp_upload_dir['basedir'], $wp_upload_dir['baseurl'], $new_thumbnail_path);
 
                 fmrseo_add_redirect($old_thumbnail_url, $new_thumbnail_url);
 
@@ -551,6 +568,13 @@ function fmrseo_rename_media_file($post_id, $seo_name, $is_restore = false)
                 fmrseo_schedule_update_content_image_references($old_thumbnail_url, $new_thumbnail_url, $seo_name, null);
             }
         }
+    }
+
+    // Keep the top-level metadata 'file' pointer (relative path of the main
+    // file) in sync too - it's a separate field from metadata['sizes'][x]['file']
+    // and some plugins/theme code read it directly.
+    if (!empty($metadata['file'])) {
+        $metadata['file'] = str_replace(basename($metadata['file']), $seo_name . '.' . $file_ext, $metadata['file']);
     }
 
     // Update the attachment metadata
@@ -614,6 +638,41 @@ function fmrseo_complete_rename_process($post_id, $seo_name, $is_restore = false
 
     // save fmrseo_image_seo_name Custom Field of the plugin
     update_post_meta($post_id, 'fmrseo_image_seo_name', $seo_name);
+
+    // Update post_name, title and alt text synchronously - these are cheap,
+    // single-row updates and must not depend on WP-Cron (which is not
+    // guaranteed to run promptly, or at all, on low-traffic sites). Only
+    // the heavier sitewide post_content/postmeta URL replacement stays
+    // deferred to the background cron job.
+    $post_data = get_post($post_id);
+
+    wp_update_post([
+        'ID' => $post_id,
+        'post_name' => $seo_name,
+    ]);
+
+    $options = fmrseo_get_options();
+    $should_rename_title = !empty($options['rename_title']);
+    $should_rename_alt_text = !empty($options['rename_alt_text']);
+
+    if ($should_rename_title || $should_rename_alt_text) {
+        // Create a readable version of the SEO name for the title and alt text
+        $readable_seo_name = str_replace(['-', '_'], ' ', $seo_name);
+        $readable_seo_name = ucfirst(trim($readable_seo_name));
+
+        if ($should_rename_title) {
+            wp_update_post(['ID' => $post_id, 'post_title' => $readable_seo_name]);
+        }
+
+        if ($should_rename_alt_text) {
+            update_post_meta($post_id, '_wp_attachment_image_alt', $readable_seo_name);
+        }
+    }
+
+    if ($post_data) {
+        clean_post_cache($post_data->ID);
+        wp_cache_delete($post_data->post_name, 'posts');
+    }
 
     // --- Begin: Save rename history ---
     // Add current file info to history before renaming
@@ -715,63 +774,23 @@ function fmrseo_ai_rename_ajax()
 /**
  * Update content image references in the background.
  *
- * @param string $old_url The old media URL.
- * @param string $new_url The new media URL.
- * @param string $seo_name The SEO name.
+ * @param string $old_url  The old media URL.
+ * @param string $new_url  The new media URL.
+ * @param string $seo_name Unused here (post_name/title/alt are updated
+ *                          synchronously in fmrseo_complete_rename_process());
+ *                          kept for hook signature compatibility.
+ * @param int|null $post_id Unused here, see $seo_name.
  */
 function fmrseo_update_content_image_references_background($old_url, $new_url, $seo_name, $post_id)
 {
     global $wpdb;
 
-    // Update post_name, and metadata if post_id is provided
-    if ($post_id) {
-
-        $post_data = get_post($post_id);
-
-        // Aggiorna il post_name
-        wp_update_post([
-            'ID' => $post_id,
-            'post_name' => $seo_name,
-        ]);
-
-
-        // Get and update attachment metadata
-        $wp_attachment_metadata = get_post_meta($post_id, '_wp_attachment_metadata', true);
-        if (!empty($wp_attachment_metadata['file'])) {
-            $file_extension = pathinfo($wp_attachment_metadata['file'], PATHINFO_EXTENSION);
-            $wp_attachment_metadata['file'] = str_replace(basename($wp_attachment_metadata['file']), $seo_name . '.' . $file_extension, $wp_attachment_metadata['file']);
-        }
-
-        update_post_meta($post_id, '_wp_attachment_metadata', $wp_attachment_metadata);
-
-        // Retrieve saved settings
-        $options = get_option('fmrseo_options');
-
-        // if rename_title or rename_alt_text options are set to true, create a readable SEO name and update the post title and alt text
-        // This is useful for SEO purposes, as it makes the title and alt text more readable for crawlers and users
-        $should_rename_title = !empty($options['rename_title']);
-        $should_rename_alt_text = !empty($options['rename_alt_text']);
-
-        if ($should_rename_title || $should_rename_alt_text) {
-            $readable_seo_name = str_replace(['-', '_'], ' ', $seo_name);
-            $readable_seo_name = ucfirst(trim($readable_seo_name));
-
-            // Update post title if option is set
-            if ($should_rename_title) {
-                wp_update_post(['ID' => $post_id, 'post_title' => $readable_seo_name]);
-            }
-
-            // Update alt text if option is set
-            if ($should_rename_alt_text) {
-                update_post_meta($post_id, '_wp_attachment_image_alt', $readable_seo_name);
-            }
-        }
-
-
-        clean_post_cache($post_data->ID);
-        wp_cache_delete($post_data->post_name, 'posts');
-    }
-
+    // Note: post_name, post_title, alt text and the attachment's own
+    // metadata are no longer updated here - they're handled synchronously
+    // in fmrseo_complete_rename_process() so they don't depend on WP-Cron
+    // actually running. This job only handles the (potentially slow)
+    // sitewide search-and-replace of the old URL across post_content and
+    // postmeta, which is safe to defer.
     $old_url_escaped = '%' . $wpdb->esc_like($old_url) . '%';
 
     // Search for the old URL in post_content of wp_posts
@@ -827,8 +846,16 @@ function fmrseo_update_content_image_references_background($old_url, $new_url, $
  */
 function fmrseo_schedule_update_content_image_references($old_url, $new_url, $seo_name, $post_id)
 {
-    if (!wp_next_scheduled('fmrseo_update_content_image_references_event')) {
-        wp_schedule_single_event(time(), 'fmrseo_update_content_image_references_event', [$old_url, $new_url, $seo_name, $post_id]);
+    $args = [$old_url, $new_url, $seo_name, $post_id];
+
+    // Passing $args scopes the "already scheduled" check to this exact
+    // event. Without it, wp_next_scheduled() treats ANY pending event on
+    // this hook as a match regardless of arguments, which silently drops
+    // every other rename's scheduled update within the same request
+    // (e.g. a batch rename, or the per-thumbnail + main-file calls made
+    // for a single attachment).
+    if (!wp_next_scheduled('fmrseo_update_content_image_references_event', $args)) {
+        wp_schedule_single_event(time(), 'fmrseo_update_content_image_references_event', $args);
     }
 }
 

@@ -106,6 +106,8 @@ class File_Media_Renamer_SEO_Settings
                 'label_for' => 'ai_provider',
                 'options' => array(
                     'openai' => esc_html__('OpenAI', 'file-media-renamer-for-seo'),
+                    'claude' => esc_html__('Claude (Anthropic)', 'file-media-renamer-for-seo'),
+                    'gemini' => esc_html__('Gemini (Google)', 'file-media-renamer-for-seo'),
                 ),
                 'description' => esc_html__('Select the AI provider to use for renaming.', 'file-media-renamer-for-seo'),
             )
@@ -119,7 +121,7 @@ class File_Media_Renamer_SEO_Settings
             'fmrseo_section_ai',
             array(
                 'label_for' => 'ai_api_key',
-                'description' => esc_html__('Enter your OpenAI API key. Leave empty to keep the current key.', 'file-media-renamer-for-seo'),
+                'description' => esc_html__('Enter the API key for the selected AI provider above. Leave empty to keep the current key.', 'file-media-renamer-for-seo'),
             )
         );
 
@@ -132,7 +134,7 @@ class File_Media_Renamer_SEO_Settings
             array(
                 'label_for' => 'ai_model',
                 'placeholder' => 'gpt-4.1-mini',
-                'description' => esc_html__('OpenAI model name used for image-based filename generation.', 'file-media-renamer-for-seo'),
+                'description' => esc_html__('Model name used for filename generation. Examples: gpt-4.1-mini (OpenAI), claude-haiku-4-5 (Claude), gemini-3.6-flash (Gemini). Leave empty to use the default model for the selected provider. AI provider model names change often - check the provider docs if you get a "model not found" error.', 'file-media-renamer-for-seo'),
             )
         );
 
@@ -171,7 +173,7 @@ class File_Media_Renamer_SEO_Settings
                 'min' => '0',
                 'max' => '60',
                 'step' => '1',
-                'description' => esc_html__('Delay used during Batch AI Rename to reduce rate-limit errors.', 'file-media-renamer-for-seo'),
+                'description' => esc_html__('Delay used during Batch AI Rename to reduce rate-limit errors. Gemini in particular tends to have a stricter rate limit than OpenAI/Claude - if you see "high demand" or rate-limit errors with Gemini, increase this value.', 'file-media-renamer-for-seo'),
             )
         );
 
@@ -210,6 +212,23 @@ class File_Media_Renamer_SEO_Settings
             'ai_delay' => 2,
             'ai_max_files' => 500,
         );
+    }
+
+    /**
+     * Returns the default AI model name for a given provider.
+     *
+     * @param string $provider Provider key.
+     * @return string
+     */
+    private static function fmrseo_get_default_model_for_provider($provider)
+    {
+        $default_models = array(
+            'openai' => 'gpt-4.1-mini',
+            'claude' => 'claude-haiku-4-5',
+            'gemini' => 'gemini-3.6-flash',
+        );
+
+        return isset($default_models[$provider]) ? $default_models[$provider] : $default_models['openai'];
     }
 
     /**
@@ -555,10 +574,11 @@ class File_Media_Renamer_SEO_Settings
             $sanitized['ai_enable'] = !empty($options['ai_enable']);
 
             $provider = isset($options['ai_provider']) ? sanitize_key($options['ai_provider']) : $defaults['ai_provider'];
-            $sanitized['ai_provider'] = ('openai' === $provider) ? 'openai' : 'openai';
+            $valid_providers = array('openai', 'claude', 'gemini');
+            $sanitized['ai_provider'] = in_array($provider, $valid_providers, true) ? $provider : $defaults['ai_provider'];
 
             $model = isset($options['ai_model']) ? sanitize_text_field($options['ai_model']) : '';
-            $sanitized['ai_model'] = !empty($model) ? $model : $defaults['ai_model'];
+            $sanitized['ai_model'] = !empty($model) ? $model : self::fmrseo_get_default_model_for_provider($sanitized['ai_provider']);
 
             $sanitized['ai_website_info'] = isset($options['ai_website_info']) ? sanitize_textarea_field($options['ai_website_info']) : '';
             $sanitized['ai_brand'] = isset($options['ai_brand']) ? sanitize_text_field($options['ai_brand']) : '';

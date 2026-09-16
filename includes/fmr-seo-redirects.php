@@ -92,7 +92,10 @@ function fmrseo_check_image_redirect()
 
     global $wpdb;
     // Build the current full URL being requested.
-    if (isset($_SERVER['REQUEST_URI'])) $request_uri = ltrim(esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])), '/');
+    $request_uri = '';
+    if (isset($_SERVER['REQUEST_URI'])) {
+        $request_uri = ltrim(esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])), '/');
+    }
 
     $current_url = rtrim(home_url(), '/') . '/' . $request_uri;
 

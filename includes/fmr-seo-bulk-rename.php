@@ -84,7 +84,7 @@ function fmrseo_display_bulk_rename_modal()
     if (!$ai_enabled) {
         $ai_notice = esc_html__('AI rename is disabled in plugin settings.', 'file-media-renamer-for-seo');
     } elseif (!$ai_key_set) {
-        $ai_notice = esc_html__('Set your OpenAI API key in AI Rename settings to enable Batch AI Rename.', 'file-media-renamer-for-seo');
+        $ai_notice = esc_html__('Set your AI provider API key in AI Rename settings to enable Batch AI Rename.', 'file-media-renamer-for-seo');
     }
 
 ?>
@@ -142,6 +142,7 @@ function fmrseo_display_bulk_rename_modal()
                 <button type="button" class="button button-secondary" id="fmrseo-cancel-bulk"><?php esc_html_e('Cancel', 'file-media-renamer-for-seo'); ?></button>
                 <button type="button" class="button button-primary fmrseo-ai-bulk-button" id="fmrseo-start-bulk-ai" title="<?php echo esc_attr__('Automatically rename selected files with AI', 'file-media-renamer-for-seo'); ?>" <?php disabled(!$ai_ready); ?>><span class="dashicons dashicons-superhero" aria-hidden="true"></span><span><?php esc_html_e('Batch AI Rename', 'file-media-renamer-for-seo'); ?></span></button>
                 <button type="button" class="button button-primary fmrseo-manual-bulk-button" id="fmrseo-start-bulk" title="<?php echo esc_attr__('Rename selected files with manual base name', 'file-media-renamer-for-seo'); ?>"><span class="dashicons dashicons-edit" aria-hidden="true"></span><span><?php esc_html_e('Start Rename', 'file-media-renamer-for-seo'); ?></span></button>
+                <button type="button" class="button button-secondary" id="fmrseo-retry-failed-bulk" style="display: none;"><span class="dashicons dashicons-update" aria-hidden="true"></span><span class="fmrseo-retry-failed-label"></span></button>
                 <button type="button" class="button button-primary" id="fmrseo-close-bulk" style="display: none;" disabled="true">
     <?php esc_html_e('Close', 'file-media-renamer-for-seo'); ?>
 </button>
@@ -178,11 +179,14 @@ function fmrseo_enqueue_bulk_rename_assets($hook)
         $ai_delay = 60;
     }
 
+    $bulk_rename_js_path = plugin_dir_path(dirname(__FILE__)) . 'assets/js/bulk-rename.js';
+    $bulk_rename_js_ver = file_exists($bulk_rename_js_path) ? (string) filemtime($bulk_rename_js_path) : FMRSEO_VERSION;
+
     wp_enqueue_script(
         'fmrseo-bulk-rename',
         plugin_dir_url(dirname(__FILE__)) . 'assets/js/bulk-rename.js',
         array('jquery'),
-        '1.0.0',
+        $bulk_rename_js_ver,
         true
     );
 
@@ -201,6 +205,7 @@ function fmrseo_enqueue_bulk_rename_assets($hook)
             'error' => esc_html__('Error during rename', 'file-media-renamer-for-seo'),
             'success' => esc_html__('File renamed successfully', 'file-media-renamer-for-seo'),
             'failed' => esc_html__('Error renaming file', 'file-media-renamer-for-seo'),
+            'request_timeout' => esc_html__('The request took too long to respond (server or AI provider timeout).', 'file-media-renamer-for-seo'),
             'results' => esc_html__('Results:', 'file-media-renamer-for-seo'),
             'error_prefix' => esc_html__('Error:', 'file-media-renamer-for-seo'),
             'cancelled' => esc_html__('Process cancelled.', 'file-media-renamer-for-seo'),
@@ -210,16 +215,22 @@ function fmrseo_enqueue_bulk_rename_assets($hook)
             'confirm_manual' => esc_html__('Are you sure you want to rename %d files?', 'file-media-renamer-for-seo'),
             /* translators: %d is the number of selected files. */
             'confirm_ai' => esc_html__('Are you sure you want to generate AI names for %d files?', 'file-media-renamer-for-seo'),
-            'ai_unavailable' => esc_html__('Set your OpenAI API key and enable AI Rename in settings first.', 'file-media-renamer-for-seo'),
-            'ai_limit_reached' => esc_html__('Batch AI Rename limit exceeded. Reduce selected files or increase max files in settings.', 'file-media-renamer-for-seo')
+            'ai_unavailable' => esc_html__('Set your AI provider API key and enable AI Rename in settings first.', 'file-media-renamer-for-seo'),
+            'ai_limit_reached' => esc_html__('Batch AI Rename limit exceeded. Reduce selected files or increase max files in settings.', 'file-media-renamer-for-seo'),
+            /* translators: %d is the number of failed files. */
+            'retry_failed' => esc_html__('Retry %d failed', 'file-media-renamer-for-seo'),
+            'retrying' => esc_html__('Retrying failed files...', 'file-media-renamer-for-seo'),
         )
     ));
+
+    $bulk_rename_css_path = plugin_dir_path(dirname(__FILE__)) . 'assets/css/bulk-rename.css';
+    $bulk_rename_css_ver = file_exists($bulk_rename_css_path) ? (string) filemtime($bulk_rename_css_path) : FMRSEO_VERSION;
 
     wp_enqueue_style(
         'fmrseo-bulk-rename',
         plugin_dir_url(dirname(__FILE__)) . 'assets/css/bulk-rename.css',
         array(),
-        '1.0.0'
+        $bulk_rename_css_ver
     );
 }
 add_action('admin_enqueue_scripts', 'fmrseo_enqueue_bulk_rename_assets');
@@ -394,7 +405,7 @@ function fmrseo_ajax_bulk_ai_rename_step()
             throw new Exception(esc_html__('AI rename is disabled in plugin settings.', 'file-media-renamer-for-seo'));
         }
         if (empty($ai_settings['api_key'])) {
-            throw new Exception(esc_html__('OpenAI API key is not configured.', 'file-media-renamer-for-seo'));
+            throw new Exception(esc_html__('AI provider API key is not configured.', 'file-media-renamer-for-seo'));
         }
 
         $post_ids = array();

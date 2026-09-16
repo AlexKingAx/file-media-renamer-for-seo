@@ -9,16 +9,12 @@ jQuery(document).ready(function ($) {
    * is injected dynamically into the DOM — the button doesn't exist on page load.
    */
   $(document).on("click", "#save-seo-name", function () {
-    console.log("Click");
 
     // Read the post ID from the custom "media-id" attribute on the button
     let post_id = $(this).attr("media-id");
 
     // Read the new SEO name typed by the user in the custom input field
     var seo_name = $("#attachments-" + post_id + "-fmrseo_image_seo_name").val();
-
-    console.log("Post ID:", post_id);
-    console.log("SEO Name:", seo_name);
 
     /**
      * Send the new name to the server via AJAX.
@@ -33,10 +29,7 @@ jQuery(document).ready(function ($) {
         _ajax_nonce: renameMedia.nonce,
       },
       function (response) {
-        console.log(response);
-
         if (response.success) {
-          console.log("SEO Name saved successfully!");
 
           // Update the "Copy Link" field in the modal with the new file URL
           $("#attachment-details-two-column-copy-link").val(response.data.url);
@@ -106,8 +99,6 @@ jQuery(document).ready(function ($) {
         '<span class="fmrseo-ai-button-text">' + renameMedia.strings.ai_processing + "</span>"
       );
 
-    console.log("AI rename requested for post ID:", post_id);
-
     /**
      * Send the request to the server.
      * The server will read the image, call the AI API, rename the file, and return the new data.
@@ -120,8 +111,6 @@ jQuery(document).ready(function ($) {
         nonce:   renameMedia.ai_nonce,
       },
       function (response) {
-        console.log("AI rename response:", response);
-
         if (response.success) {
 
           // Update the "Copy Link" field with the new file URL

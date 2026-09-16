@@ -21,10 +21,76 @@ interface FMRSEO_AI_Provider_Interface
 }
 
 /**========================================================
+ * Shared helpers reused by AI provider implementations.
+ **========================================================*/
+trait FMRSEO_AI_Provider_Helpers
+{
+    /**
+     * Reads file contents from local disk.
+     *
+     * @param string $file_path Local file path.
+     * @return string|WP_Error
+     */
+    private function read_local_file_contents($file_path)
+    {
+        if (function_exists('fmrseo_get_filesystem')) {
+            $filesystem = fmrseo_get_filesystem();
+            if (!is_wp_error($filesystem)) {
+                $contents = $filesystem->get_contents($file_path);
+                if (false !== $contents) {
+                    return $contents;
+                }
+            }
+        }
+
+        $contents = @file_get_contents($file_path);
+        if (false !== $contents) {
+            return $contents;
+        }
+
+        return new WP_Error('fmrseo_ai_read_failed', esc_html__('Unable to read the attachment file.', 'file-media-renamer-for-seo'));
+    }
+
+    /**
+     * Extracts an error message from a JSON response body given a key path.
+     *
+     * @param string $body            Raw response body.
+     * @param array  $path            Sequence of array keys to walk (e.g. ['error', 'message']).
+     * @param string $default_message Fallback error message.
+     *
+     * @return string
+     */
+    private function extract_json_error_message($body, array $path, $default_message)
+    {
+        $decoded = json_decode((string) $body, true);
+
+        if (!is_array($decoded)) {
+            return $default_message;
+        }
+
+        $value = $decoded;
+        foreach ($path as $key) {
+            if (!is_array($value) || !isset($value[$key])) {
+                return $default_message;
+            }
+            $value = $value[$key];
+        }
+
+        if (is_string($value) && '' !== trim($value)) {
+            return sanitize_text_field($value);
+        }
+
+        return $default_message;
+    }
+}
+
+/**========================================================
  * OpenAI provider implementation.
  **========================================================*/
 class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
 {
+    use FMRSEO_AI_Provider_Helpers;
+
     /**
      * OpenAI Responses API endpoint.
      */
@@ -231,7 +297,7 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
                                 'content' => $content_items,
                             ),
                         ),
-                        'max_output_tokens' => 80,
+                        'max_output_tokens' => 1024,
                     )
                 ),
             )
@@ -293,7 +359,7 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
 
         if ($status_code >= 400) {
             $default_message = esc_html__('OpenAI file upload failed.', 'file-media-renamer-for-seo');
-            return new WP_Error('fmrseo_ai_upload_failed', $this->extract_error_message($response_body, $default_message));
+            return new WP_Error('fmrseo_ai_upload_failed', $this->extract_json_error_message($response_body, array('error', 'message'), $default_message));
         }
 
         $decoded = json_decode($response_body, true);
@@ -317,7 +383,7 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
 
         if ($status_code >= 400) {
             $default_message = esc_html__('OpenAI returned an error. Please check your API key, model, and usage limits.', 'file-media-renamer-for-seo');
-            return new WP_Error('fmrseo_ai_api_error', $this->extract_error_message($body, $default_message));
+            return new WP_Error('fmrseo_ai_api_error', $this->extract_json_error_message($body, array('error', 'message'), $default_message));
         }
 
         $payload = json_decode($body, true);
@@ -355,33 +421,44 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
             }
         }
 
-        return new WP_Error('fmrseo_ai_empty_response', esc_html__('OpenAI did not return a filename.', 'file-media-renamer-for-seo'));
+        return new WP_Error('fmrseo_ai_empty_response', $this->describe_empty_response($payload));
     }
 
     /**
-     * Reads file contents from local disk.
+     * Builds a descriptive error message for an empty OpenAI response.
      *
-     * @param string $file_path Local file path.
-     * @return string|WP_Error
+     * @param array $payload Decoded Responses API payload.
+     * @return string
      */
-    private function read_local_file_contents($file_path)
+    private function describe_empty_response($payload)
     {
-        if (function_exists('fmrseo_get_filesystem')) {
-            $filesystem = fmrseo_get_filesystem();
-            if (!is_wp_error($filesystem)) {
-                $contents = $filesystem->get_contents($file_path);
-                if (false !== $contents) {
-                    return $contents;
-                }
-            }
+        $incomplete_reason = '';
+        if (isset($payload['incomplete_details']['reason']) && is_string($payload['incomplete_details']['reason'])) {
+            $incomplete_reason = $payload['incomplete_details']['reason'];
         }
 
-        $contents = @file_get_contents($file_path);
-        if (false !== $contents) {
-            return $contents;
+        if ('max_output_tokens' === $incomplete_reason) {
+            return esc_html__('OpenAI used all available output tokens for internal reasoning and produced no filename. Try increasing the model output limit or use a different model.', 'file-media-renamer-for-seo');
         }
 
-        return new WP_Error('fmrseo_ai_read_failed', esc_html__('Unable to read the attachment file.', 'file-media-renamer-for-seo'));
+        if (!empty($incomplete_reason)) {
+            return sprintf(
+                /* translators: %s is OpenAI's incomplete_details.reason value. */
+                esc_html__('OpenAI did not return a filename (incomplete: %s).', 'file-media-renamer-for-seo'),
+                sanitize_text_field($incomplete_reason)
+            );
+        }
+
+        $status = isset($payload['status']) && is_string($payload['status']) ? $payload['status'] : '';
+        if (!empty($status) && 'completed' !== $status) {
+            return sprintf(
+                /* translators: %s is OpenAI's response status value. */
+                esc_html__('OpenAI did not return a filename (status: %s).', 'file-media-renamer-for-seo'),
+                sanitize_text_field($status)
+            );
+        }
+
+        return esc_html__('OpenAI did not return a filename.', 'file-media-renamer-for-seo');
     }
 
     /**
@@ -459,25 +536,6 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
 
         return in_array($extension, $uploadable_extensions, true);
     }
-
-    /**
-     * Extracts OpenAI error messages if present.
-     *
-     * @param string $body            Raw response body.
-     * @param string $default_message Fallback error message.
-     *
-     * @return string
-     */
-    private function extract_error_message($body, $default_message)
-    {
-        $decoded = json_decode($body, true);
-
-        if (!empty($decoded['error']['message']) && is_string($decoded['error']['message'])) {
-            return sanitize_text_field($decoded['error']['message']);
-        }
-
-        return $default_message;
-    }
 }
 
 /**
@@ -491,6 +549,16 @@ function fmrseo_get_ai_provider_instance($provider)
 {
     if ('openai' === $provider) {
         return new FMRSEO_OpenAI_Provider();
+    }
+
+    if ('claude' === $provider) {
+        require_once plugin_dir_path(__FILE__) . 'class-fmr-seo-ai-provider-claude.php';
+        return new FMRSEO_Claude_Provider();
+    }
+
+    if ('gemini' === $provider) {
+        require_once plugin_dir_path(__FILE__) . 'class-fmr-seo-ai-provider-gemini.php';
+        return new FMRSEO_Gemini_Provider();
     }
 
     return new WP_Error('fmrseo_ai_provider_not_supported', esc_html__('Selected AI provider is not supported.', 'file-media-renamer-for-seo'));

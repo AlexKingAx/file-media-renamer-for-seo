@@ -88,11 +88,20 @@ jQuery(document).ready(function ($) {
   function startManualBulkRename(baseName) {
     prepareProcessUi();
 
-    $.post(fmrseoBulkRename.ajax_url, {
-      action:    "fmrseo_bulk_rename",
-      post_ids:  ids,
-      base_name: baseName,
-      nonce:     fmrseoBulkRename.nonce,
+    $.ajax({
+      url: fmrseoBulkRename.ajax_url,
+      method: "POST",
+      // Without a timeout, a request that never gets a response from the
+      // server (e.g. a hung PHP process) leaves the UI frozen forever with
+      // no error shown. 90s gives margin above the 60s the server-side AI
+      // requests are capped at.
+      timeout: 90000,
+      data: {
+        action:    "fmrseo_bulk_rename",
+        post_ids:  ids,
+        base_name: baseName,
+        nonce:     fmrseoBulkRename.nonce,
+      },
     })
       .done(function (response) {
         if (!response.success) {
@@ -139,18 +148,35 @@ jQuery(document).ready(function ($) {
     // Reset accumulated results and start from offset 0
     aiResults = [];
     prepareProcessUi();
-    processAIBatch(0);
+    processAIBatch(0, ids);
+  });
+
+  // User clicks "Retry failed" → re-run AI rename only for files that failed last time
+  $("#fmrseo-retry-failed-bulk").on("click", function () {
+    if (isProcessing) {
+      return;
+    }
+
+    const failedIds = getFailedIds();
+    if (failedIds.length === 0) {
+      return;
+    }
+
+    prepareRetryUi();
+    processAIBatch(0, failedIds);
   });
 
   /**
    * Processes one batch of files via AI, then schedules the next batch.
    * The server handles one batch at a time and returns the next offset,
-   * so this function calls itself recursively until all files are processed
-   * or the user cancels.
+   * so this function calls itself recursively until all the given files are
+   * processed or the user cancels. Used both for the initial run (targetIds
+   * = every selected file) and for retrying just the files that failed.
    *
-   * @param {number} offset - Index of the first file to process in this batch
+   * @param {number} offset      - Index of the first file to process in this batch, within targetIds
+   * @param {Array}  targetIds   - Post IDs to process in this run
    */
-  function processAIBatch(offset) {
+  function processAIBatch(offset, targetIds) {
 
     // Stop immediately if the user pressed "Cancel"
     if (isCancelled) {
@@ -158,12 +184,23 @@ jQuery(document).ready(function ($) {
       return;
     }
 
-    $.post(fmrseoBulkRename.ajax_url, {
-      action:     "fmrseo_bulk_ai_rename_step",
-      post_ids:   ids,
-      offset:     offset,
-      batch_size: aiBatchSize,
-      nonce:      fmrseoBulkRename.ai_nonce,
+    $.ajax({
+      url: fmrseoBulkRename.ajax_url,
+      method: "POST",
+      // Without a timeout, a single hung step (e.g. the AI provider or the
+      // host's PHP process taking too long) leaves the whole batch frozen
+      // with no error and no way to recover short of reloading the page.
+      // 90s gives margin above the 60s the server-side AI request is capped
+      // at; a timeout here surfaces as a normal failed result for this
+      // batch, which the "Retry failed" button can then pick up.
+      timeout: 90000,
+      data: {
+        action:     "fmrseo_bulk_ai_rename_step",
+        post_ids:   targetIds,
+        offset:     offset,
+        batch_size: aiBatchSize,
+        nonce:      fmrseoBulkRename.ai_nonce,
+      },
     })
       .done(function (response) {
         if (!response.success) {
@@ -175,23 +212,27 @@ jQuery(document).ready(function ($) {
         const data        = response.data || {};
         const stepResults = Array.isArray(data.results) ? data.results : [];
         const nextOffset  = Number(data.next_offset || 0);
+        const runTotal    = Number(data.total || targetIds.length);
         const done        = Boolean(data.done);
 
-        // Append this batch's results to the full list and refresh the display
+        // Merge this batch's results into the master list (replacing any
+        // previous entry for the same post, e.g. during a retry) and
+        // refresh the display.
         if (stepResults.length > 0) {
-          aiResults = aiResults.concat(stepResults);
+          mergeResults(stepResults);
           displayResults(aiResults);
         }
 
-        // Update the progress bar based on how many files have been processed
-        const percentage = totalItems > 0
-          ? Math.min(Math.round((nextOffset / totalItems) * 100), 100)
+        // Update the progress bar based on how many files (of this run) have been processed
+        const percentage = runTotal > 0
+          ? Math.min(Math.round((nextOffset / runTotal) * 100), 100)
           : 100;
         updateProgress(percentage);
 
-        // If the server says we're done (or we've passed all IDs), stop here
-        if (done || nextOffset >= totalItems) {
+        // If the server says we're done (or we've passed all target IDs), stop here
+        if (done || nextOffset >= runTotal) {
           $(".fmrseo-progress-text").text(fmrseoBulkRename.strings.completed);
+          updateFailedButtonVisibility();
           finishProcess();
           return;
         }
@@ -199,13 +240,94 @@ jQuery(document).ready(function ($) {
         // Wait the configured delay before sending the next batch
         // (avoids hammering the AI API and gives the UI time to breathe)
         setTimeout(function () {
-          processAIBatch(nextOffset);
+          processAIBatch(nextOffset, targetIds);
         }, aiDelayMs);
       })
-      .fail(function () {
-        displayError(fmrseoBulkRename.strings.error);
+      .fail(function (jqXHR, textStatus) {
+        // A timed-out/hung request means we never heard back about the
+        // file(s) this step was processing. Mark them as failed (instead of
+        // wiping the whole results list) so they show up in the results and
+        // can be picked up again via "Retry failed" - the batch just stops
+        // here rather than hammering an already-struggling server.
+        const timedOutIds = targetIds.slice(offset, offset + aiBatchSize);
+        const failMessage = "timeout" === textStatus
+          ? fmrseoBulkRename.strings.request_timeout
+          : fmrseoBulkRename.strings.error;
+
+        if (timedOutIds.length > 0) {
+          mergeResults(timedOutIds.map(function (id) {
+            return { success: false, post_id: id, message: failMessage };
+          }));
+          displayResults(aiResults);
+          updateFailedButtonVisibility();
+        } else {
+          displayError(failMessage);
+        }
+
         finishProcess();
       });
+  }
+
+  /**
+   * Merges a batch of new results into the master aiResults list.
+   * If a result for the same post_id already exists (e.g. it previously
+   * failed and is now being retried), it is replaced in place so the
+   * displayed list never shows the same file twice.
+   *
+   * @param {Array} newResults - Results returned by the latest AJAX step
+   */
+  function mergeResults(newResults) {
+    newResults.forEach(function (result) {
+      const existingIndex = aiResults.findIndex(function (r) {
+        return r.post_id === result.post_id;
+      });
+
+      if (existingIndex !== -1) {
+        aiResults[existingIndex] = result;
+      } else {
+        aiResults.push(result);
+      }
+    });
+  }
+
+  // Returns the post IDs of every file that failed in the last run
+  function getFailedIds() {
+    return aiResults
+      .filter(function (r) { return !r.success; })
+      .map(function (r) { return r.post_id; });
+  }
+
+  // Shows/updates or hides the "Retry failed" button based on aiResults
+  function updateFailedButtonVisibility() {
+    const failedIds = getFailedIds();
+    const $retryButton = $("#fmrseo-retry-failed-bulk");
+
+    if (failedIds.length === 0) {
+      $retryButton.hide();
+      return;
+    }
+
+    $retryButton
+      .find(".fmrseo-retry-failed-label")
+      .text(formatString(fmrseoBulkRename.strings.retry_failed, failedIds.length));
+    $retryButton.show().prop("disabled", false);
+  }
+
+  /**
+   * Prepares the modal UI for a "Retry failed" run: unlike prepareProcessUi(),
+   * this keeps the existing results list visible (successful renames stay on
+   * screen) and does not touch the base-name/manual-rename controls.
+   */
+  function prepareRetryUi() {
+    isProcessing = true;
+    isCancelled  = false;
+
+    $("#fmrseo-retry-failed-bulk").hide().prop("disabled", true);
+    $("#fmrseo-close-bulk").prop("disabled", true);
+
+    $(".fmrseo-progress").show();
+    updateProgress(0);
+    $(".fmrseo-progress-text").text(fmrseoBulkRename.strings.retrying);
   }
 
   // ─── UI HELPERS ─────────────────────────────────────────────────────────────
@@ -221,6 +343,7 @@ jQuery(document).ready(function ($) {
 
     $(".fmrseo-progress").show();
     $(".fmrseo-results").empty().show();
+    $("#fmrseo-retry-failed-bulk").hide();
 
     // Close button is shown but kept disabled until the process ends
     $("#fmrseo-close-bulk").show().prop("disabled", true);
