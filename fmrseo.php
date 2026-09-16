@@ -126,7 +126,7 @@ function fmrseo_get_ai_settings()
         'enabled' => !empty($options['ai_enable']),
         'provider' => isset($options['ai_provider']) ? sanitize_key($options['ai_provider']) : 'openai',
         'api_key' => isset($options['ai_api_key']) ? trim((string) $options['ai_api_key']) : '',
-        'model' => isset($options['ai_model']) ? trim((string) $options['ai_model']) : 'gpt-4.1-mini',
+        'model' => isset($options['ai_model']) ? trim((string) $options['ai_model']) : 'gpt-5.6-luna',
         'website_info' => isset($options['ai_website_info']) ? (string) $options['ai_website_info'] : '',
         'brand' => isset($options['ai_brand']) ? (string) $options['ai_brand'] : '',
         'delay' => $delay,

@@ -133,8 +133,8 @@ class File_Media_Renamer_SEO_Settings
             'fmrseo_section_ai',
             array(
                 'label_for' => 'ai_model',
-                'placeholder' => 'gpt-4.1-mini',
-                'description' => esc_html__('Model name used for filename generation. Examples: gpt-4.1-mini (OpenAI), claude-haiku-4-5 (Claude), gemini-3.6-flash (Gemini). Leave empty to use the default model for the selected provider. AI provider model names change often - check the provider docs if you get a "model not found" error.', 'file-media-renamer-for-seo'),
+                'placeholder' => 'gpt-5.6-luna',
+                'description' => esc_html__('Model name used for filename generation. Examples: gpt-5.6-luna (OpenAI), claude-haiku-4-5 (Claude), gemini-3.6-flash (Gemini). Leave empty to use the default model for the selected provider. AI provider model names change often - check the provider docs if you get a "model not found" error.', 'file-media-renamer-for-seo'),
             )
         );
 
@@ -206,7 +206,7 @@ class File_Media_Renamer_SEO_Settings
             'ai_enable' => false,
             'ai_provider' => 'openai',
             'ai_api_key' => '',
-            'ai_model' => 'gpt-4.1-mini',
+            'ai_model' => 'gpt-5.6-luna',
             'ai_website_info' => '',
             'ai_brand' => '',
             'ai_delay' => 2,
@@ -223,7 +223,7 @@ class File_Media_Renamer_SEO_Settings
     private static function fmrseo_get_default_model_for_provider($provider)
     {
         $default_models = array(
-            'openai' => 'gpt-4.1-mini',
+            'openai' => 'gpt-5.6-luna',
             'claude' => 'claude-haiku-4-5',
             'gemini' => 'gemini-3.6-flash',
         );

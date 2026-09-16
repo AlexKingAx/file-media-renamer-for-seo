@@ -101,6 +101,16 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
     const FILES_ENDPOINT = 'https://api.openai.com/v1/files';
 
     /**
+     * Reasoning effort sent to reasoning-capable models (o1/o3, GPT-5.x,
+     * GPT-6 Astra, ...). This task (generating a short filename) doesn't
+     * need deep reasoning, so we default to the lowest effort confirmed to
+     * work across the whole reasoning-capable range - "none" is rejected
+     * with a 400 on some models (e.g. GPT-6 Astra), so "low" is the safe
+     * universal minimum. Change here if a future use case needs more.
+     */
+    const REASONING_EFFORT = 'low';
+
+    /**
      * Generates a raw filename proposal for an attachment.
      *
      * @param int   $attachment_id Attachment ID.
@@ -140,7 +150,7 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
 
         $model = isset($settings['model']) ? trim((string) $settings['model']) : '';
         if (empty($model)) {
-            $model = 'gpt-4.1-mini';
+            $model = 'gpt-5.6-luna';
         }
 
         $website_info = isset($settings['website_info']) ? (string) $settings['website_info'] : '';
@@ -280,6 +290,21 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
      */
     private function send_responses_request($api_key, $model, $content_items)
     {
+        $body = array(
+            'model' => $model,
+            'input' => array(
+                array(
+                    'role' => 'user',
+                    'content' => $content_items,
+                ),
+            ),
+            'max_output_tokens' => 1024,
+        );
+
+        if ($this->model_supports_reasoning($model)) {
+            $body['reasoning'] = array('effort' => self::REASONING_EFFORT);
+        }
+
         $response = wp_remote_post(
             self::API_ENDPOINT,
             array(
@@ -288,18 +313,7 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
                     'Content-Type' => 'application/json',
                 ),
                 'timeout' => 60,
-                'body' => wp_json_encode(
-                    array(
-                        'model' => $model,
-                        'input' => array(
-                            array(
-                                'role' => 'user',
-                                'content' => $content_items,
-                            ),
-                        ),
-                        'max_output_tokens' => 1024,
-                    )
-                ),
+                'body' => wp_json_encode($body),
             )
         );
 
@@ -307,7 +321,23 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
             return new WP_Error('fmrseo_ai_request_failed', esc_html__('OpenAI request failed. Please try again.', 'file-media-renamer-for-seo'));
         }
 
-        return $this->extract_output_from_response($response);
+        return $this->extract_output_from_response($response, $model);
+    }
+
+    /**
+     * Checks whether a model is expected to support the `reasoning` field
+     * (Responses API) based on its name. The model field is free text, so
+     * there is no fixed list to match against - this pattern covers the
+     * confirmed reasoning-capable families (o1/o3, GPT-5.x including the
+     * 5.6 Sol/Terra/Luna tier, GPT-6 Astra) and any future minor version
+     * under those prefixes without needing a plugin update.
+     *
+     * @param string $model OpenAI model name.
+     * @return bool
+     */
+    private function model_supports_reasoning($model)
+    {
+        return (bool) preg_match('/^(o1|o3|gpt-5|gpt-6)/i', trim((string) $model));
     }
 
     /**
@@ -373,17 +403,43 @@ class FMRSEO_OpenAI_Provider implements FMRSEO_AI_Provider_Interface
     /**
      * Extracts the final output text from a Responses API response.
      *
-     * @param array $response Raw WP HTTP response.
+     * @param array  $response Raw WP HTTP response.
+     * @param string $model    OpenAI model used for this request (for error logging).
      * @return string|WP_Error
      */
-    private function extract_output_from_response($response)
+    private function extract_output_from_response($response, $model = '')
     {
         $status_code = (int) wp_remote_retrieve_response_code($response);
         $body = (string) wp_remote_retrieve_body($response);
 
         if ($status_code >= 400) {
             $default_message = esc_html__('OpenAI returned an error. Please check your API key, model, and usage limits.', 'file-media-renamer-for-seo');
-            return new WP_Error('fmrseo_ai_api_error', $this->extract_json_error_message($body, array('error', 'message'), $default_message));
+            $error_message = $this->extract_json_error_message($body, array('error', 'message'), $default_message);
+
+            // If we sent a `reasoning` field and the model rejected it (e.g. our
+            // prefix-based detection matched a model that doesn't actually
+            // support this specific parameter/value), log it clearly instead of
+            // failing silently - the exact OpenAI error code for this case isn't
+            // documented, so we match on the message text as a best effort.
+            if ($this->model_supports_reasoning($model) && false !== stripos($error_message, 'reasoning')) {
+                error_log(sprintf(
+                    '[File Media Renamer for SEO] OpenAI model "%s" rejected the reasoning effort parameter: %s',
+                    $model,
+                    $error_message
+                ));
+
+                return new WP_Error(
+                    'fmrseo_ai_reasoning_unsupported',
+                    sprintf(
+                        /* translators: 1: OpenAI model name, 2: raw error message from OpenAI. */
+                        esc_html__('OpenAI model "%1$s" did not accept the reasoning effort parameter used by this plugin: %2$s', 'file-media-renamer-for-seo'),
+                        sanitize_text_field($model),
+                        $error_message
+                    )
+                );
+            }
+
+            return new WP_Error('fmrseo_ai_api_error', $error_message);
         }
 
         $payload = json_decode($body, true);
